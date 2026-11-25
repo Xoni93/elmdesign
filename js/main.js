@@ -157,7 +157,7 @@
      Sans serveur : ouvre la messagerie du visiteur avec le message pré-rempli.
      Pour un envoi direct, branchez un service (Formspree, Netlify Forms, etc.). */
   const status = document.getElementById('formStatus');
-  const CONTACT_EMAIL = 'contact@elmdesign.fr';
+  const CONTACT_EMAIL = 'elmdesign74@gmail.com';
   // Affiche le message sous le formulaire avec un fondu (relancé à chaque nouveau message)
   const showStatus = (text, success) => {
     status.textContent = text;
