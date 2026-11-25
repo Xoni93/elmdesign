@@ -1,0 +1,5 @@
+# Fichiers à ne pas envoyer sur GitHub
+Claude outputs/
+.vscode/
+Thumbs.db
+desktop.ini
