@@ -1,0 +1,188 @@
+/* =========================================================
+   ELM Design — raffinement du design
+   Typographie, couleurs et finitions (principes d'Emil Kowalski)
+   Chargé en dernier : ce fichier affine les styles existants
+   sans les réécrire. Le retirer de index.html suffit à revenir
+   à l'ancien rendu.
+   ========================================================= */
+
+/* ---------- 1. Couleurs : bleu nuit plus profond, or plus sobre ---------- */
+:root {
+  /* Fonds */
+  --navy-900: #060b17;
+  --navy-800: #0a1222;
+  --navy-700: #111b30;
+  --surface: rgba(16, 26, 46, .62);        /* cartes, formulaire */
+  --surface-strong: rgba(10, 17, 32, .82);
+
+  /* Or : une seule teinte d'accent, fidèle au logo */
+  --gold-300: #f3e3bd;
+  --gold-400: #e4bd68;
+  --gold-500: #c99c45;
+  --gold-600: #9c7836;
+  --gold-grad: linear-gradient(180deg, #f1d083 0%, #dcae52 100%);
+
+  /* Texte : contraste suffisant sur le bleu nuit (> 7:1 et > 4.5:1) */
+  --text: #eef1f7;
+  --muted: #a3aec3;
+  --subtle: #7d889e;
+
+  /* Bordures : blanc translucide plutôt qu'un trait doré partout */
+  --line: rgba(255, 255, 255, .08);
+  --line-strong: rgba(255, 255, 255, .14);
+  --ring: 0 0 0 1px var(--line);
+
+  /* Ombres douces en couches (contact + diffusion) */
+  --shadow: 0 1px 1px rgba(0, 0, 0, .25), 0 12px 32px -12px rgba(0, 0, 0, .6);
+  --shadow-lg: 0 1px 1px rgba(0, 0, 0, .3), 0 24px 60px -20px rgba(0, 0, 0, .75);
+
+  /* Courbes : un ease-out franc pour l'interface */
+  --ease: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  --ease-drawer: cubic-bezier(.32, .72, 0, 1);
+
+  /* Typographie */
+  --serif: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif;     /* titres */
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;     /* texte */
+  --accent-font: "Instrument Serif", Georgia, "Times New Roman", serif;  /* mot d'accent en italique */
+}
+
+/* ---------- 2. Typographie ---------- */
+body {
+  font-feature-settings: "cv11", "ss01";   /* Inter : « a » simple, chiffres plus lisibles */
+  font-optical-sizing: auto;
+  text-rendering: optimizeLegibility;
+}
+h1, h2, h3 { font-weight: 600; letter-spacing: -.035em; line-height: 1.08; text-wrap: balance; }
+h2 { font-size: clamp(2rem, 3.6vw, 3rem); }
+h3 { font-size: 1.35rem; letter-spacing: -.025em; line-height: 1.2; }
+p { text-wrap: pretty; }
+
+/* Le titre de l'accueil : plus serré, plus net */
+.hero__title { font-size: clamp(2.5rem, 6vw, 5rem); line-height: 1.02; letter-spacing: -.032em; }
+.hero__sub { color: #b9c3d6; max-width: 36rem; }
+
+/* Le mot doré (« briller ») : un vrai italique à empattements, en écho au logo.
+   Sora n'a pas d'italique : le navigateur penchait la lettre artificiellement. */
+.word--gold, h1 em {
+  font-family: var(--accent-font); font-style: italic; font-weight: 400;
+  letter-spacing: -.01em; font-size: 1.12em; line-height: .9; padding-right: .04em;
+  background: linear-gradient(180deg, #f6dc9a 0%, #e4bd68 55%, #c99c45 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Petits titres de section : plus discrets, mieux espacés */
+.eyebrow { font-size: .74rem; font-weight: 600; letter-spacing: .18em; color: var(--gold-400); }
+.section__head { max-width: 640px; }
+.section__head p:last-child { font-size: 1.05rem; line-height: 1.6; }
+
+/* Chiffres alignés (étapes, compteurs) */
+.step__num, .values strong { font-variant-numeric: tabular-nums; }
+
+/* Liens du texte : soulignement fin et décalé */
+.footer__copy a, .contact__list a { text-underline-offset: 3px; text-decoration-thickness: 1px; }
+
+/* ---------- 3. Boutons ---------- */
+.btn { font-weight: 600; letter-spacing: -.005em; transition: transform 160ms var(--ease), box-shadow .25s var(--ease), background-color .2s ease, color .2s ease, border-color .2s ease; }
+.btn--gold {
+  background: var(--gold-grad); color: #1a1205;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px -10px rgba(228, 189, 104, .55);
+}
+.btn--ghost { background: rgba(255, 255, 255, .04); border-color: var(--line-strong); }
+.btn--pill { font-weight: 600; color: #121826; }
+
+/* Le survol ne s'applique qu'avec une vraie souris (pas d'effet bloqué au toucher) */
+@media (hover: hover) and (pointer: fine) {
+  .btn--gold:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 1px 2px rgba(0, 0, 0, .3), 0 14px 32px -12px rgba(228, 189, 104, .7); }
+  .btn--ghost:hover { transform: translateY(-1px); border-color: rgba(228, 189, 104, .5); color: var(--gold-300); }
+}
+.btn:active, .btn--gold:active, .btn--ghost:active, .filter:active { transform: scale(.97); transition-duration: 120ms; }
+
+/* ---------- 4. Navigation ---------- */
+.nav { transition: background-color .3s ease, border-color .3s ease, padding .3s var(--ease); }
+.nav.is-scrolled { background: rgba(6, 11, 23, .72); border-color: var(--line); }
+.nav__brand { font-size: 1.35rem; letter-spacing: -.01em; }
+.nav__brand em { color: var(--gold-400); }
+.nav__pill { border-color: var(--line-strong); background: rgba(255, 255, 255, .06); gap: 1.9rem; }
+.nav__pill a { font-weight: 500; color: #b9c3d6; }
+.nav__pill a.is-active::after { background: var(--gold-400); }
+
+/* ---------- 5. Cartes, étapes, projets ---------- */
+.card {
+  background: linear-gradient(180deg, rgba(22, 34, 58, .66), rgba(10, 17, 32, .72));
+  border: 1px solid var(--line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), var(--shadow);
+}
+.card::before { background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(228, 189, 104, .09), transparent 45%); }
+.card__icon { background: rgba(228, 189, 104, .07); border-color: rgba(228, 189, 104, .18); border-radius: 12px; }
+.card li { color: #c9d1df; }
+.card li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--gold-400); flex: none; }
+@media (hover: hover) and (pointer: fine) {
+  .card:hover { border-color: var(--line-strong); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07), var(--shadow-lg); }
+}
+
+.step__num { font-size: 1.25rem; font-weight: 600; border-color: rgba(228, 189, 104, .55); box-shadow: 0 0 0 8px var(--navy-900), 0 0 24px -6px rgba(228, 189, 104, .4); }
+
+.filter { border-color: var(--line-strong); font-weight: 500; }
+.filter.is-active { background: var(--gold-grad); color: #1a1205; border-color: transparent; font-weight: 600; }
+@media (hover: hover) and (pointer: fine) {
+  .filter:hover:not(.is-active) { color: var(--text); border-color: rgba(228, 189, 104, .45); }
+}
+
+.project { border-color: var(--line); box-shadow: var(--shadow); }
+.project__info span { font-size: .72rem; letter-spacing: .14em; font-weight: 600; }
+.project__info h3 { font-size: 1.3rem; }
+@media (hover: hover) and (pointer: fine) {
+  .project:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+}
+
+/* ---------- 6. À propos, contact, formulaire ---------- */
+.values div { background: rgba(255, 255, 255, .03); border-color: var(--line); }
+.values strong { font-weight: 600; letter-spacing: -.02em; }
+
+.contact__list svg { border-color: var(--line-strong); }
+.form {
+  background: linear-gradient(180deg, rgba(20, 31, 54, .7), rgba(8, 14, 28, .85));
+  border-color: var(--line); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), var(--shadow-lg);
+}
+.form label { font-weight: 500; color: #b9c3d6; }
+.form input, .form select, .form textarea {
+  font-size: 16px; /* 16 px minimum : iOS ne zoome plus sur le champ */
+  background: rgba(4, 8, 18, .55); border-color: var(--line-strong);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.form input::placeholder, .form textarea::placeholder { color: var(--subtle); }
+.form input:focus, .form select:focus, .form textarea:focus { border-color: rgba(228, 189, 104, .7); box-shadow: 0 0 0 4px rgba(228, 189, 104, .14); }
+.form .is-invalid { border-color: #ef8a8a; box-shadow: 0 0 0 4px rgba(239, 138, 138, .12); }
+
+.footer { border-top-color: var(--line); }
+
+/* ---------- 7. Animations : plus courtes et plus franches ---------- */
+/* Apparition au défilement : 0,6 s au lieu de 0,9 s, déplacement réduit */
+.reveal { transform: translateY(18px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+/* Menu mobile : courbe de tiroir iOS */
+@media (max-width: 860px) {
+  .nav__links { transition: transform .4s var(--ease-drawer); background: rgba(6, 11, 23, .96); border-left-color: var(--line); }
+}
+/* Mouvement réduit : on garde des fondus doux au lieu de tout couper */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transform: none !important; transition: opacity .3s ease !important; }
+  .reveal:not(.is-visible) { opacity: 0; }
+}
+
+/* ---------- 8. Mobile : se comporter comme une vraie application ---------- */
+html {
+  -webkit-tap-highlight-color: transparent;  /* plus de flash gris au toucher */
+  -webkit-text-size-adjust: 100%;            /* pas de texte grossi en paysage */
+}
+a, button, [role="button"], .filter { touch-action: manipulation; }   /* clic immédiat */
+button, .btn, .filter, .nav__burger { -webkit-user-select: none; user-select: none; }
+.hero { min-height: 100svh; }   /* l'accueil ne passe plus sous la barre d'adresse */
+@media (max-width: 600px) {
+  .hero__form input { font-size: 16px; }
+  .hero__title { letter-spacing: -.03em; }
+}
+/* Encoche et barre d'accueil des iPhone */
+.nav { padding-top: max(18px, env(safe-area-inset-top, 0px)); }
+.nav.is-scrolled { padding-top: max(10px, env(safe-area-inset-top, 0px)); }
+.footer { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
