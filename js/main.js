@@ -120,7 +120,7 @@
   /* ---------- Barre e-mail de l'accueil → formulaire de contact ---------- */
   const heroForm = document.getElementById('heroForm');
   const form = document.getElementById('contactForm');
-  heroForm.addEventListener('submit', e => {
+  if (heroForm) heroForm.addEventListener('submit', e => {
     e.preventDefault();
     const email = document.getElementById('heroEmail').value.trim();
     form.querySelector('[name="email"]').value = email;
