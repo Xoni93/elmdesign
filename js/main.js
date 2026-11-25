@@ -107,14 +107,37 @@
   /* ---------- Filtres des réalisations ---------- */
   const filters = document.querySelectorAll('.filter');
   const projects = document.querySelectorAll('.project');
+  const EASE = 'cubic-bezier(.22, 1, .36, 1)'; // même courbe que --ease en CSS
+  let filterTimer;
   filters.forEach(btn => btn.addEventListener('click', () => {
     filters.forEach(b => { b.classList.toggle('is-active', b === btn); b.setAttribute('aria-selected', String(b === btn)); });
     const f = btn.dataset.filter;
-    projects.forEach(p => {
-      const show = f === 'all' || p.dataset.cat === f;
-      p.classList.toggle('is-hidden', !show);
-      if (show) p.classList.add('is-visible');
-    });
+    const matches = p => f === 'all' || p.dataset.cat === f;
+    // Interrompt proprement une animation en cours si on clique vite sur plusieurs filtres
+    clearTimeout(filterTimer);
+    projects.forEach(p => p.getAnimations().forEach(a => a.cancel()));
+
+    const apply = () => {
+      let shown = 0;
+      projects.forEach(p => {
+        const show = matches(p);
+        p.classList.toggle('is-hidden', !show);
+        if (!show) return;
+        p.classList.add('is-visible');
+        // Les projets affichés apparaissent en fondu, avec un léger décalage (6 cartes max)
+        if (!reduceMotion) p.animate(
+          [{ opacity: 0, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }],
+          { duration: 220, easing: EASE, delay: Math.min(shown, 5) * 40, fill: 'backwards' }
+        );
+        shown++;
+      });
+    };
+
+    const leaving = [...projects].filter(p => !p.classList.contains('is-hidden') && !matches(p));
+    if (reduceMotion || !leaving.length) return apply();
+    // Les projets masqués s'effacent rapidement avant que la grille ne se réorganise
+    leaving.forEach(p => p.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150, easing: 'ease-out', fill: 'forwards' }));
+    filterTimer = setTimeout(() => { leaving.forEach(p => p.getAnimations().forEach(a => a.cancel())); apply(); }, 150);
   }));
 
   /* ---------- Barre e-mail de l'accueil → formulaire de contact ---------- */
@@ -135,6 +158,14 @@
      Pour un envoi direct, branchez un service (Formspree, Netlify Forms, etc.). */
   const status = document.getElementById('formStatus');
   const CONTACT_EMAIL = 'contact@elmdesign.fr';
+  // Affiche le message sous le formulaire avec un fondu (relancé à chaque nouveau message)
+  const showStatus = (text, success) => {
+    status.textContent = text;
+    status.classList.toggle('is-success', success);
+    status.classList.remove('is-shown');
+    void status.offsetWidth;
+    status.classList.add('is-shown');
+  };
   form.addEventListener('submit', e => {
     e.preventDefault();
     let valid = true;
@@ -143,12 +174,12 @@
       f.classList.toggle('is-invalid', !ok);
       if (!ok) valid = false;
     });
-    if (!valid) { status.textContent = 'Merci de remplir tous les champs correctement.'; return; }
+    if (!valid) { showStatus('Merci de remplir tous les champs correctement.', false); return; }
     const d = new FormData(form);
     const subject = `Demande de devis — ${d.get('type')}`;
     const body = `Nom : ${d.get('nom')}\nE-mail : ${d.get('email')}\nProjet : ${d.get('type')}\n\n${d.get('message')}`;
     window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    status.textContent = 'Merci ! Votre messagerie va s’ouvrir pour envoyer la demande.';
+    showStatus('Merci ! Votre messagerie va s’ouvrir pour envoyer la demande.', true);
     form.reset();
   });
 
