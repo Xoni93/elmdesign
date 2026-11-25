@@ -32,15 +32,15 @@
 
 body { background: #f7f8fb; color: var(--text); }
 
-/* Fond : la vidéo sombre est remplacée par un fond clair avec un léger halo bleu */
+/* Fond : la vidéo reste, sous un voile clair pour garder le thème blanc et un texte lisible */
 .bg-video { background: #f7f8fb; }
-.bg-video video { display: none; }
+.bg-video video { filter: saturate(.85) brightness(1.08); }
 .bg-video__shade {
   background:
-    radial-gradient(60% 45% at 50% 0%, rgba(47, 91, 255, .10), transparent 70%),
-    radial-gradient(40% 30% at 90% 60%, rgba(47, 91, 255, .05), transparent 70%);
+    radial-gradient(60% 50% at 50% 42%, rgba(247, 248, 251, .72), rgba(247, 248, 251, .3) 70%, transparent 100%),
+    linear-gradient(180deg, rgba(247, 248, 251, .7) 0%, rgba(247, 248, 251, .22) 35%, rgba(247, 248, 251, .35) 70%, rgba(247, 248, 251, .92) 100%);
 }
-.bg-video__shade::after { content: none; }
+.bg-video__shade::after { content: ""; position: absolute; inset: 0; background: #2f5bff; mix-blend-mode: color; opacity: .18; } /* légère teinte bleue */
 .bg-video__dim { background: #f7f8fb; }
 .hero { background: transparent; }
 .hero__title, .section__head h2, .about__text h2, .contact__text h2,
@@ -140,3 +140,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -.035em; color: var(--text); }
 
 /* Focus clavier visible */
 .btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline-color: #2f5bff; }
+
+/* Texte de l'accueil un peu plus foncé : il reste lisible au-dessus de la vidéo */
+.hero__sub { color: #334155; }
+.hero__logos p { color: #5b6478; }
