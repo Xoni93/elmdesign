@@ -198,3 +198,7 @@ button, .btn, .filter, .nav__burger { -webkit-user-select: none; user-select: no
 @media (hover: hover) and (pointer: fine) {
   .project--real:hover .project__visit span { transform: translate(2px, -2px); }
 }
+
+/* Deux réalisations : grille centrée sur deux colonnes */
+.grid--2 { grid-template-columns: repeat(2, 1fr); max-width: 860px; margin-inline: auto; }
+@media (max-width: 700px) { .grid--2 { grid-template-columns: 1fr; } }
