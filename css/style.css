@@ -370,3 +370,15 @@ html.lenis, html.lenis body { height: auto; }
 h1, h2, h3 { font-weight: 600; letter-spacing: -0.035em; }
 .hero__title { color: var(--text); }
 .hero__sub, .section__head p, .card p, .step p { color: var(--muted); }
+
+
+/* Logo ELM Design (fond transparent) */
+.about__logo{display:grid;place-items:center}
+.about__logo img{width:min(100%,460px);height:auto;filter:drop-shadow(0 12px 40px rgba(233,196,106,.22))}
+.footer__logo{display:inline-block;justify-self:center}
+.footer__logo img{width:190px;height:auto;filter:drop-shadow(0 8px 28px rgba(233,196,106,.2));transition:transform .3s ease}
+.footer__logo:hover img{transform:translateY(-2px)}
+.footer__credit{display:inline-flex;align-items:center;gap:10px;justify-self:center;margin:14px 0 4px;padding:7px 16px 7px 12px;border-radius:999px;border:1px solid rgba(233,196,106,.28);background:rgba(255,255,255,.04);font-size:.82rem;color:var(--muted)}
+.footer__credit-logo{display:inline-flex;align-items:center;gap:8px;color:var(--gold-300);font-weight:600;text-decoration:none}
+.footer__credit-logo img{height:24px;width:auto}
+.footer__credit-logo:hover span{color:var(--gold-400)}
