@@ -11,11 +11,16 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/scene.css">
+  <link rel="stylesheet" href="css/fond-video.css">
 </head>
 <body>
-  <!-- Scène 3D fixe derrière tout le site : ordinateur, smartphone et symboles de code -->
-  <canvas class="scene-canvas" id="scene3d" aria-hidden="true"></canvas>
+  <!-- Vidéo de fond fixe derrière tout le site (bureau au sommet d'une montagne au coucher du soleil) -->
+  <div class="bg-video" id="bgVideo" aria-hidden="true">
+    <video autoplay loop muted playsinline preload="auto"
+      src="https://media.scrollhaus.ai/resources/openhero/videos/enterprice/payment-operations.mp4"></video>
+    <div class="bg-video__shade"></div>
+    <div class="bg-video__dim"></div>
+  </div>
 
   <!-- ===== Navigation ===== -->
   <header class="nav stagger-nav" id="nav">
@@ -40,7 +45,7 @@
   </header>
 
   <main>
-    <!-- ===== Accueil : scène 3D en fond ===== -->
+    <!-- ===== Accueil : vidéo en fond ===== -->
     <section class="hero" id="accueil">
       <div class="hero__col">
         <p class="hero__badge stagger" data-delay="150">Création sites web &amp; applications mobiles</p>
@@ -299,9 +304,7 @@
 
   <!-- Défilement fluide (Lenis) -->
   <script type="importmap">{ "imports": {
-    "lenis": "https://unpkg.com/lenis@1.3.19/dist/lenis.mjs",
-    "three": "https://unpkg.com/three@0.143.0/build/three.module.js",
-    "three/examples/jsm/": "https://unpkg.com/three@0.143.0/examples/jsm/"
+    "lenis": "https://unpkg.com/lenis@1.3.19/dist/lenis.mjs"
   } }</script>
   <script type="module">
     import Lenis from "lenis";
@@ -312,293 +315,27 @@
       requestAnimationFrame(raf);
     }
   </script>
-  <script type="module">
-/* ===== Scène 3D ELM Design : ordinateur + smartphone + symboles de code (Three.js r143) ===== */
-import * as THREE from 'three';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectionShader.js';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-
-const GOLD = '#e3c486', GOLD_DEEP = '#c9a35b', BLUE = '#3a6cff', SKY = '#7aa6e0';
-// Trajectoire au défilement (0 = haut de page, 1 = bas)
-const STOPS_X = [{ p: 0, v: 0 }, { p: 0.3, v: -3.7 }, { p: 0.64, v: 3.7 }, { p: 1, v: 0.4 }];
-const STOPS_Y = [{ p: 0, v: -3.85 }, { p: 0.3, v: -0.35 }, { p: 0.64, v: -0.1 }, { p: 1, v: -0.4 }];
-const STOPS_S = [{ p: 0, v: 1.12 }, { p: 0.3, v: 0.78 }, { p: 0.64, v: 0.76 }, { p: 1, v: 0.9 }];
-const ENTRY_DUR = 1.9, ENTRY_START_Y = -5.5;
-
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-function sample(stops, p) {
-  if (p <= stops[0].p) return stops[0].v;
-  for (let i = 0; i < stops.length - 1; i++) {
-    const a = stops[i], b = stops[i + 1];
-    if (p <= b.p) { let t = (p - a.p) / (b.p - a.p); t = t * t * (3 - 2 * t); return a.v + (b.v - a.v) * t; }
-  }
-  return stops[stops.length - 1].v;
-}
-function canvasTexture(w, h, draw) {
-  const c = document.createElement('canvas'); c.width = w; c.height = h;
-  const ctx = c.getContext('2d'); draw(ctx, w, h);
-  const tex = new THREE.CanvasTexture(c); tex.encoding = THREE.sRGBEncoding; tex.anisotropy = 4;
-  tex.userData = { ctx, w, h };
-  return tex;
-}
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
-}
-
-const canvas = document.getElementById('scene3d');
-let renderer;
-try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); }
-catch (e) { console.warn('Scène 3D désactivée (WebGL indisponible)', e); }
-
-if (renderer) {
-  const dpr = Math.min(devicePixelRatio || 1, 2);
-  renderer.setPixelRatio(dpr);
-  renderer.setSize(innerWidth, innerHeight, false);
-
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0.0016, 0.0024, 0.0065); // bleu nuit (avant correction gamma)
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture; // reflets doux sur le métal
-
-  const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 200);
-  camera.position.set(0, 0, 8);
-
-  scene.add(new THREE.AmbientLight(0xffffff, 0.18));
-  const key = new THREE.DirectionalLight(0xffffff, 0.8); key.position.set(3, 5, 6); scene.add(key);
-  const rimBlue = new THREE.PointLight(BLUE, 2.2, 14); rimBlue.position.set(-4, 1.5, 1); scene.add(rimBlue);
-  const rimGold = new THREE.PointLight(GOLD, 1.6, 12); rimGold.position.set(4, -1, 3); scene.add(rimGold);
-
-  const composer = new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.5, 0.5, 0.82);
-  composer.addPass(bloom);
-  composer.addPass(new ShaderPass(GammaCorrectionShader));
-
-  // ----- Groupes -----
-  const worldGroup = new THREE.Group(); scene.add(worldGroup);   // position + échelle (défilement)
-  const rig = new THREE.Group(); rig.rotation.x = 0.32; worldGroup.add(rig); // rotation des appareils
-
-  // ----- Matériaux -----
-  const shell = new THREE.MeshStandardMaterial({ color: '#0f1726', metalness: 0.35, roughness: 0.55, envMapIntensity: 0.22 });
-  const goldMetal = new THREE.MeshStandardMaterial({ color: GOLD_DEEP, metalness: 1, roughness: 0.3, envMapIntensity: 0.55 });
-  const edgeGold = new THREE.LineBasicMaterial({ color: GOLD, transparent: true, opacity: 0.9 });
-  const keyMat = new THREE.MeshStandardMaterial({ color: '#070b14', metalness: 0.2, roughness: 0.7, envMapIntensity: 0.2 });
-
-  // ----- Écran du portable : code qui s'écrit tout seul -----
-  const CODE = [
-    '<\!-- ELM Design · index.html -->',
-    '<section class="hero">',
-    '  <h1>Des sites qui font briller</h1>',
-    '  <a class="btn" href="#contact">Devis</a>',
-    '</section>',
-    '',
-    '<script type="module">',
-    '  const app = createApp({',
-    "    nom: 'ELM Design',",
-    "    services: ['web', 'iOS', 'Android'],",
-    '    rapide: true,',
-    '    responsive: true,',
-    '  });',
-    '  app.lancer();',
-    '<\/script>',
-  ];
-  const TOKEN = /(<!--.*?-->|<\/?[a-zA-Z0-9]+|\/?>|'[^']*'|"[^"]*"|\b(?:const|true|type|class|href)\b|\b[a-zA-Z]+(?=\())/g;
-  const colorOf = t => t.startsWith('<!--') ? '#5c6b88' : (t[0] === '<' || t.endsWith('>')) ? '#8fd3ff'
-    : (t[0] === "'" || t[0] === '"') ? GOLD : /^(const|true|type|class|href)$/.test(t) ? '#c792ea' : '#82aaff';
-  const codeTex = canvasTexture(1024, 640, () => {});
-  let typed = 0, holdUntil = 0, lastDraw = 0;
-  const totalChars = CODE.reduce((n, l) => n + l.length + 1, 0);
-  function drawCode(showCursor) {
-    const { ctx, w, h } = codeTex.userData;
-    ctx.fillStyle = '#0a101c'; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#111a2b'; ctx.fillRect(0, 0, w, 46);                         // barre d'onglets
-    ['#ff5f57', '#febc2e', '#28c840'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(26 + i * 22, 23, 7, 0, 7); ctx.fill(); });
-    ctx.fillStyle = '#0a101c'; roundRect(ctx, 100, 10, 170, 36, 6); ctx.fill();
-    ctx.fillStyle = GOLD; ctx.font = '600 18px Menlo, Consolas, monospace'; ctx.fillText('index.html', 120, 34);
-    ctx.font = '22px Menlo, Consolas, monospace';
-    let left = typed, y = 92, cx = 0, cy = 0;
-    CODE.forEach((line, i) => {
-      ctx.fillStyle = '#3b4863'; ctx.fillText(String(i + 1).padStart(2, ' '), 18, y);
-      const shown = line.slice(0, Math.max(0, Math.min(line.length, left)));
-      let x = 74, last = 0; TOKEN.lastIndex = 0; let m;
-      const paint = (txt, col) => { ctx.fillStyle = col; ctx.fillText(txt, x, y); x += ctx.measureText(txt).width; };
-      while ((m = TOKEN.exec(shown))) { if (m.index > last) paint(shown.slice(last, m.index), '#d6deeb'); paint(m[0], colorOf(m[0])); last = m.index + m[0].length; }
-      if (last < shown.length) paint(shown.slice(last), '#d6deeb');
-      if (left >= 0 && left <= line.length) { cx = x; cy = y; }
-      left -= line.length + 1; y += 34;
-    });
-    if (showCursor) { ctx.fillStyle = GOLD; ctx.fillRect(cx + 2, cy - 20, 3, 26); }
-    codeTex.needsUpdate = true;
-  }
-  typed = reduceMotion ? totalChars : 0;
-  drawCode(true);
-
-  // ----- Écran du smartphone : interface d'application -----
-  const appTex = canvasTexture(512, 1040, (ctx, w, h) => {
-    const g = ctx.createLinearGradient(0, 0, 0, h); g.addColorStop(0, '#0e1a33'); g.addColorStop(1, '#070d1a');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#d6deeb'; ctx.font = '600 24px Arial'; ctx.fillText('9:41', 40, 56);
-    ctx.fillStyle = '#000'; roundRect(ctx, w / 2 - 70, 26, 140, 38, 19); ctx.fill();
-    ctx.fillStyle = '#9fb0c8'; ctx.font = '26px Arial'; ctx.fillText('Bonjour', 40, 140);
-    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 46px Georgia, serif'; ctx.fillText('Mon projet', 40, 196);
-    const card = (y, c1, c2, title, pct) => {
-      const cg = ctx.createLinearGradient(40, y, w - 40, y + 170); cg.addColorStop(0, c1); cg.addColorStop(1, c2);
-      ctx.fillStyle = cg; roundRect(ctx, 40, y, w - 80, 170, 26); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.font = 'bold 30px Arial'; ctx.fillText(title, 70, y + 62);
-      ctx.fillStyle = 'rgba(255,255,255,.25)'; roundRect(ctx, 70, y + 110, w - 140, 14, 7); ctx.fill();
-      ctx.fillStyle = '#fff'; roundRect(ctx, 70, y + 110, (w - 140) * pct, 14, 7); ctx.fill();
+  <script>
+  /* Vidéo de fond : s'assombrit en défilant, l'accueil remonte et s'efface en douceur */
+  (() => {
+    const bg = document.getElementById('bgVideo');
+    const video = bg.querySelector('video');
+    const heroCol = document.querySelector('.hero__col');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { video.removeAttribute('autoplay'); video.pause(); }
+    // Pause quand l'onglet est caché (économise batterie et données)
+    document.addEventListener('visibilitychange', () => { if (document.hidden) video.pause(); else if (!reduce) video.play().catch(() => {}); });
+    const update = () => {
+      const y = window.scrollY;
+      bg.style.setProperty('--dim', Math.min(1, y / innerHeight) * 0.72);
+      if (heroCol && !reduce) {
+        heroCol.style.transform = `translateY(calc(-9vh + ${y * 0.4}px))`;
+        heroCol.style.opacity = Math.max(0, 1 - y / 600);
+      }
     };
-    card(240, '#2a68a8', '#13233f', 'Site vitrine', 0.9);
-    card(440, '#c9a35b', '#6b4f22', 'Application', 0.65);
-    card(640, '#4b3a8f', '#1b1635', 'E-commerce', 0.4);
-    ctx.fillStyle = GOLD; roundRect(ctx, 40, 856, w - 80, 76, 38); ctx.fill();
-    ctx.fillStyle = '#0a1a33'; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center'; ctx.fillText('Demander un devis', w / 2, 904);
-    ctx.fillStyle = 'rgba(255,255,255,.5)'; roundRect(ctx, w / 2 - 70, h - 34, 140, 8, 4); ctx.fill();
-  });
-
-  // ----- Logo au dos de l'écran -----
-  const logoTex = canvasTexture(512, 320, (ctx, w, h) => {
-    ctx.clearRect(0, 0, w, h); ctx.textAlign = 'center';
-    const g = ctx.createLinearGradient(0, 80, 0, 240); g.addColorStop(0, '#f6e7bf'); g.addColorStop(1, '#b88d45');
-    ctx.fillStyle = g; ctx.font = 'bold 150px Georgia, serif'; ctx.fillText('ELM', w / 2, 190);
-    ctx.font = '600 44px Georgia, serif'; ctx.fillText('D E S I G N', w / 2, 262);
-  });
-
-  // ----- Ordinateur portable -----
-  const laptop = new THREE.Group(); laptop.position.set(-0.45, 0, 0); rig.add(laptop);
-  const BW = 3.3, BD = 2.25, BH = 0.11;
-  const base = new THREE.Mesh(new RoundedBoxGeometry(BW, BH, BD, 3, 0.05), shell); laptop.add(base);
-  const baseEdges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(BW, BH, BD)), edgeGold); laptop.add(baseEdges);
-  // clavier
-  const cols = 13, rows = 5, kw = 0.19, kg = 0.034;
-  const keys = new THREE.InstancedMesh(new RoundedBoxGeometry(kw, 0.03, kw, 2, 0.02), keyMat, cols * rows);
-  const m4 = new THREE.Matrix4(); let k = 0;
-  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
-    m4.makeTranslation((c - (cols - 1) / 2) * (kw + kg), BH / 2 + 0.012, -0.72 + r * (kw + kg)); keys.setMatrixAt(k++, m4);
-  }
-  laptop.add(keys);
-  const pad = new THREE.Mesh(new RoundedBoxGeometry(1.05, 0.012, 0.62, 2, 0.02), new THREE.MeshStandardMaterial({ color: '#0c1322', metalness: 0.4, roughness: 0.5, envMapIntensity: 0.2 }));
-  pad.position.set(0, BH / 2 + 0.004, 0.68); laptop.add(pad);
-  // écran (charnière à l'arrière)
-  const hinge = new THREE.Group(); hinge.position.set(0, BH / 2, -BD / 2 + 0.04); hinge.rotation.x = -0.22; laptop.add(hinge);
-  const LH = 2.1, LT = 0.07;
-  const lid = new THREE.Mesh(new RoundedBoxGeometry(BW, LH, LT, 3, 0.04), shell); lid.position.set(0, LH / 2, 0); hinge.add(lid);
-  const lidEdges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(BW, LH, LT)), edgeGold); lidEdges.position.copy(lid.position); hinge.add(lidEdges);
-  const screen = new THREE.Mesh(new THREE.PlaneGeometry(BW - 0.2, LH - 0.2), new THREE.MeshBasicMaterial({ map: codeTex, toneMapped: false }));
-  screen.position.set(0, LH / 2, LT / 2 + 0.002); hinge.add(screen);
-  const logo = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.81), new THREE.MeshBasicMaterial({ map: logoTex, transparent: true, toneMapped: false }));
-  logo.position.set(0, LH / 2, -LT / 2 - 0.003); logo.rotation.y = Math.PI; hinge.add(logo);
-
-  // ----- Smartphone -----
-  const phone = new THREE.Group(); phone.position.set(2.15, 0.98, 0.55); phone.rotation.set(-0.1, -0.42, 0.06); rig.add(phone);
-  const PW = 0.98, PH = 2.0, PT = 0.1;
-  phone.add(new THREE.Mesh(new RoundedBoxGeometry(PW, PH, PT, 4, 0.14), goldMetal));
-  const pscreen = new THREE.Mesh(new RoundedBoxGeometry(PW - 0.07, PH - 0.07, 0.01, 4, 0.004), new THREE.MeshBasicMaterial({ map: appTex, toneMapped: false }));
-  pscreen.position.z = PT / 2 + 0.002; phone.add(pscreen);
-
-  // ----- Anneaux dorés -----
-  const rings = new THREE.Group(); worldGroup.add(rings);
-  [[3.35, 1.25, 0.18, 0.0045], [3.8, 1.45, -0.35, 0.003]].forEach(([r, rx, rz, tube]) => {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(r, tube, 8, 220), new THREE.MeshBasicMaterial({ color: GOLD, transparent: true, opacity: 0.75 }));
-    ring.rotation.set(rx, 0, rz); rings.add(ring);
-  });
-
-  // ----- Symboles de code qui flottent -----
-  const SYMBOLS = ['</>', '{ }', '=>', '( )', '#', ';', '<div>', 'const', '[ ]', '&&', '.css', 'app()'];
-  const symbolGroup = new THREE.Group(); worldGroup.add(symbolGroup);
-  const symbols = SYMBOLS.map((txt, i) => {
-    const color = i % 3 === 0 ? SKY : GOLD;
-    const tex = canvasTexture(256, 128, (ctx, w, h) => {
-      ctx.clearRect(0, 0, w, h); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.font = `600 ${txt.length > 3 ? 46 : 64}px Menlo, Consolas, monospace`;
-      ctx.shadowColor = color; ctx.shadowBlur = 18; ctx.fillStyle = color; ctx.fillText(txt, w / 2, h / 2);
-    });
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, opacity: 0.85 }));
-    const a = (i / SYMBOLS.length) * Math.PI * 2;
-    sp.userData = { a, r: 3.4 + (i % 4) * 0.45, y: Math.sin(i * 1.7) * 1.6, speed: 0.12 + (i % 3) * 0.04, ph: i * 0.9 };
-    const s = 0.55 + (i % 3) * 0.12; sp.scale.set(s * 2, s, 1);
-    symbolGroup.add(sp); return sp;
-  });
-
-  // ----- Étoiles -----
-  const starGeo = new THREE.BufferGeometry();
-  { const n = 900, pos = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      const u = Math.random() * 2 - 1, th = Math.random() * Math.PI * 2, r = Math.sqrt(1 - u * u), d = 40 + Math.random() * 40;
-      pos[i * 3] = d * r * Math.cos(th); pos[i * 3 + 1] = d * u; pos[i * 3 + 2] = -Math.abs(d * r * Math.sin(th)); }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); }
-  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: '#cfe0ff', size: 0.12, sizeAttenuation: true, transparent: true, opacity: 0.8, depthWrite: false }));
-  scene.add(stars);
-
-  // ----- Souris : léger effet de parallaxe -----
-  const mouse = { x: 0, y: 0, tx: 0, ty: 0 };
-  addEventListener('pointermove', e => { mouse.tx = e.clientX / innerWidth - 0.5; mouse.ty = e.clientY / innerHeight - 0.5; }, { passive: true });
-
-  // ----- Boucle -----
-  let curP = 0, curX = STOPS_X[0].v, curY = STOPS_Y[0].v, curS = STOPS_S[0].v, t = 0;
-  let last = performance.now() / 1000; const start = last; let active = true;
-  document.addEventListener('visibilitychange', () => { active = !document.hidden; last = performance.now() / 1000; });
-
-  function resize() {
-    const w = innerWidth, h = innerHeight;
-    camera.aspect = w / h; camera.updateProjectionMatrix();
-    renderer.setSize(w, h, false); composer.setPixelRatio(dpr); composer.setSize(w, h);
-  }
-  addEventListener('resize', resize); resize();
-
-  function frame() {
-    requestAnimationFrame(frame);
-    if (!active) return;
-    const now = performance.now() / 1000, dt = Math.min(now - last, 0.05); last = now; t += dt;
-
-    const max = document.documentElement.scrollHeight - innerHeight;
-    const pTarget = clamp(max > 0 ? scrollY / max : 0, 0, 1);
-    curP += (pTarget - curP) * Math.min(1, dt * 4.5);
-    const side = clamp(innerWidth / 1200, 0.5, 1), k = Math.min(1, dt * 3.2);
-    const narrow = innerWidth < 700 ? 0.56 : 1, lift = innerWidth < 700 ? -0.85 : 0;
-    curX += (sample(STOPS_X, curP) * side - curX) * k;
-    curY += (sample(STOPS_Y, curP) + lift * (1 - curP) - curY) * k;
-    curS += (sample(STOPS_S, curP) * narrow - curS) * k;
-
-    let entryY = 0;
-    if (!reduceMotion) { const e = clamp((now - start) / ENTRY_DUR, 0, 1); entryY = ENTRY_START_Y * Math.pow(1 - e, 3); }
-    const bob = reduceMotion ? 0 : Math.sin(t * 0.9) * 0.07;
-    worldGroup.position.set(curX, curY + entryY + bob, 0);
-    worldGroup.scale.setScalar(curS);
-
-    mouse.x += (mouse.tx - mouse.x) * Math.min(1, dt * 3); mouse.y += (mouse.ty - mouse.y) * Math.min(1, dt * 3);
-    rig.rotation.y = -0.38 + curP * Math.PI * 2 + (reduceMotion ? 0 : Math.sin(t * 0.35) * 0.08) + mouse.x * 0.35;
-    rig.rotation.x = 0.32 + mouse.y * 0.18;
-    rig.rotation.z = reduceMotion ? 0 : Math.sin(t * 0.6) * 0.02;
-
-    rings.rotation.y = t * 0.12; rings.rotation.z = Math.sin(t * 0.2) * 0.1;
-    symbols.forEach(sp => {
-      const u = sp.userData, a = u.a + (reduceMotion ? 0 : t * u.speed);
-      sp.position.set(Math.cos(a) * u.r, u.y + Math.sin(t * 0.8 + u.ph) * 0.15, Math.sin(a) * u.r * 0.6);
-      sp.material.opacity = 0.45 + 0.4 * (0.5 + 0.5 * Math.sin(t * 1.3 + u.ph));
-    });
-    stars.rotation.y = t * 0.006;
-
-    // code qui s'écrit (environ 38 caractères par seconde, puis recommence)
-    if (!reduceMotion) {
-      if (typed < totalChars) typed = Math.min(totalChars, typed + dt * 38);
-      else if (!holdUntil) holdUntil = now + 2.5;
-      else if (now > holdUntil) { typed = 0; holdUntil = 0; }
-      if (now - lastDraw > 1 / 15) { lastDraw = now; drawCode(Math.floor(now * 2) % 2 === 0 || typed < totalChars); }
-    }
-
-    composer.render();
-  }
-  frame();
-}
-
-  </script>
+    addEventListener('scroll', update, { passive: true });
+    update();
+  })();
+</script>
 </body>
 </html>

@@ -1,9 +1,19 @@
 /* =========================================================
-   ELM Design — scène 3D en fond
-   Ordinateur + smartphone + symboles de code derrière le site, sections en verre par-dessus.
+   ELM Design — vidéo en fond
+   Vidéo fixe derrière le site, assombrie au défilement, sections en verre par-dessus.
    ========================================================= */
 body { background: #04060f; }
-.scene-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 0; pointer-events: none; }
+.bg-video { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: #071428; }
+.bg-video video { width: 100%; height: 100%; object-fit: cover; transform: scale(1.05); }
+/* voile : haut sombre pour la navigation, centre légèrement assombri pour le titre, bas fondu vers le bleu nuit */
+.bg-video__shade {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(4, 10, 24, .55) 0%, rgba(4, 10, 24, .18) 30%, rgba(4, 10, 24, .25) 60%, rgba(7, 20, 40, .85) 100%),
+    radial-gradient(ellipse 55% 45% at 50% 40%, rgba(4, 10, 24, .45), transparent 75%);
+}
+/* assombrissement progressif quand on descend dans la page (piloté en JS via --dim) */
+.bg-video__dim { position: absolute; inset: 0; background: #071428; opacity: var(--dim, 0); }
 main, .footer { position: relative; z-index: 1; }
 
 /* ---------- Accueil ---------- */
@@ -11,9 +21,10 @@ main, .footer { position: relative; z-index: 1; }
   background: radial-gradient(125% 62% at 50% -10%, rgba(4, 6, 15, .82) 0%, rgba(4, 6, 15, .28) 44%, transparent 68%);
   justify-content: flex-start; padding: 120px 20px 0;
 }
-.hero__col { position: relative; flex: 1; justify-content: center; transform: translateY(-9vh); }
-/* voile sombre derrière le texte pour rester lisible au-dessus de la scène 3D */
+.hero__col { position: relative; flex: 1; justify-content: center; transform: translateY(-9vh); will-change: transform, opacity; }
+/* voile sombre derrière le texte pour rester lisible au-dessus de la vidéo */
 .hero__col::before {
+  display: none;
   content: ""; position: absolute; z-index: -1; left: 50%; top: 50%; width: min(900px, 110vw); height: 130%;
   transform: translate(-50%, -50%); pointer-events: none;
   background: radial-gradient(closest-side, rgba(4, 6, 15, .62), rgba(4, 6, 15, .35) 55%, transparent);
@@ -31,7 +42,7 @@ main, .footer { position: relative; z-index: 1; }
 .hero__logos li { font-family: var(--serif); font-size: 1.3rem; font-weight: 600; color: #c9d2e6; opacity: .85; transition: color .2s, opacity .2s; }
 .hero__logos li:hover { color: var(--gold-300); opacity: 1; }
 
-/* ---------- Sections transparentes : la scène 3D passe derrière ---------- */
+/* ---------- Sections transparentes : la vidéo passe derrière ---------- */
 .section--alt, .contact, .footer { background: transparent; }
 .section__head h2, .about__text h2, .contact__text h2 { text-shadow: 0 2px 40px rgba(0, 0, 0, .6); }
 .section__head p, .about__text p, .contact__text p { text-shadow: 0 1px 24px rgba(0, 0, 0, .55); }
