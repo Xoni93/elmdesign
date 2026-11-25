@@ -8,19 +8,19 @@
   --navy-700: #0f2547;
   --blue-600: #1d4f86;
   --blue-500: #2a68a8;
-  --gold-300: #f4e2b4;
-  --gold-400: #e3c486;
-  --gold-500: #c9a35b;
+  --gold-300: #f1e4c6;
+  --gold-400: #e9c46a;
+  --gold-500: #cfa64a;
   --gold-600: #a8823e;
-  --text: #e8edf5;
-  --muted: #9fb0c8;
+  --text: #f4f6fa;
+  --muted: #aab5c8;
   --line: rgba(227, 196, 134, .18);
   --radius: 18px;
   --shadow: 0 20px 50px -20px rgba(0, 0, 0, .6);
-  --gold-grad: linear-gradient(135deg, #f6e7bf 0%, #d9b46c 45%, #b88d45 70%, #f1dca6 100%);
+  --gold-grad: linear-gradient(135deg, #f1e4c6 0%, #e9c46a 45%, #cfa64a 75%, #f1e4c6 100%);
   --ease: cubic-bezier(.22, 1, .36, 1);
-  --serif: "Cormorant Garamond", Georgia, serif;
-  --sans: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif; /* titres */
+  --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; /* texte */
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -365,3 +365,8 @@ html.lenis, html.lenis body { height: auto; }
   .reveal, .stagger, .word, .nav.stagger-nav { opacity: 1; transform: none; }
 }
 .word--gold { font-style: italic; padding-right: .06em; }
+
+/* ---------- Typographie « Géométrique » : Sora (titres) + Inter (texte) ---------- */
+h1, h2, h3 { font-weight: 600; letter-spacing: -0.035em; }
+.hero__title { color: var(--text); }
+.hero__sub, .section__head p, .card p, .step p { color: var(--muted); }
