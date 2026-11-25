@@ -1,0 +1,142 @@
+/* =========================================================
+   Thème « Blanc et bleu électrique »
+   Fond clair, texte encre, accent bleu électrique.
+   Chargé en dernier : retirer la ligne de ce fichier dans
+   index.html suffit à revenir au thème bleu nuit et or.
+   ========================================================= */
+:root {
+  --navy-900: #ffffff;
+  --navy-800: #f7f8fb;
+  --navy-700: #eef1f7;
+  --blue-600: #2f5bff;
+  --blue-500: #2f5bff;
+
+  /* L'accent (anciennement « or ») devient le bleu électrique */
+  --gold-300: #1f45e0;
+  --gold-400: #2f5bff;
+  --gold-500: #2f5bff;
+  --gold-600: #1f45e0;
+  --gold-grad: linear-gradient(180deg, #4470ff 0%, #2f5bff 100%);
+
+  --text: #0f172a;
+  --muted: #5b6478;
+  --subtle: #8a93a6;
+  --line: #e3e7ef;
+  --line-strong: #d9deea;
+
+  --shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 8px 24px -12px rgba(15, 23, 42, .12);
+  --shadow-lg: 0 1px 2px rgba(15, 23, 42, .06), 0 20px 48px -20px rgba(15, 23, 42, .22);
+
+  --serif: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;  /* titres */
+}
+
+body { background: #f7f8fb; color: var(--text); }
+
+/* Fond : la vidéo sombre est remplacée par un fond clair avec un léger halo bleu */
+.bg-video { background: #f7f8fb; }
+.bg-video video { display: none; }
+.bg-video__shade {
+  background:
+    radial-gradient(60% 45% at 50% 0%, rgba(47, 91, 255, .10), transparent 70%),
+    radial-gradient(40% 30% at 90% 60%, rgba(47, 91, 255, .05), transparent 70%);
+}
+.bg-video__shade::after { content: none; }
+.bg-video__dim { background: #f7f8fb; }
+.hero { background: transparent; }
+.hero__title, .section__head h2, .about__text h2, .contact__text h2,
+.hero__sub, .section__head p, .about__text p, .contact__text p { text-shadow: none; }
+
+/* Titres : Manrope, gras, sans le mot en italique */
+h1, h2, h3 { font-weight: 700; letter-spacing: -.035em; color: var(--text); }
+.hero__title { color: var(--text); letter-spacing: -.04em; }
+.word--gold, h1 em {
+  font-family: var(--serif); font-style: normal; font-weight: 700; font-size: 1em; line-height: inherit;
+  letter-spacing: -.04em; background: none; color: #2f5bff; -webkit-text-fill-color: #2f5bff;
+}
+.hero__sub, .section__head p:last-child, .card p, .step p, .about__text > p:not(.eyebrow), .contact__text > p:not(.eyebrow) { color: var(--muted); }
+.eyebrow { color: #2f5bff; }
+
+/* Navigation */
+.nav__brand { color: var(--text); }
+.nav__brand em { color: #2f5bff; }
+.nav.is-scrolled { background: rgba(255, 255, 255, .82); border-color: var(--line); box-shadow: 0 1px 0 rgba(15, 23, 42, .03); }
+.nav__pill { background: rgba(255, 255, 255, .7); border-color: var(--line-strong); box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
+.nav__pill a { color: #4a5368; }
+.nav__pill a:hover, .nav__pill a.is-active { color: var(--text); }
+.nav__burger span { background: var(--text); }
+@media (max-width: 860px) {
+  .nav__links { background: rgba(255, 255, 255, .97); border-left-color: var(--line); }
+}
+
+/* Accueil */
+.hero__badge { background: #fff; border-color: var(--line-strong); color: #334155; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
+.hero__badge::before { background: #2f5bff; box-shadow: 0 0 0 3px rgba(47, 91, 255, .15); }
+.hero__logos p { color: var(--subtle); }
+.hero__logos li { color: #334155; opacity: 1; }
+.hero__logos li:hover { color: #2f5bff; }
+.hero__foot { color: var(--subtle); }
+
+/* Boutons */
+.btn--gold { background: #2f5bff; color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 1px 2px rgba(15, 23, 42, .12), 0 8px 20px -8px rgba(47, 91, 255, .55); }
+.btn--ghost { background: #fff; color: var(--text); border-color: var(--line-strong); box-shadow: 0 1px 2px rgba(15, 23, 42, .04); backdrop-filter: none; -webkit-backdrop-filter: none; }
+.btn--pill { background: #0f172a; color: #fff; }
+@media (hover: hover) and (pointer: fine) {
+  .btn--gold:hover { background: #1f45e0; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 1px 2px rgba(15, 23, 42, .12), 0 12px 28px -10px rgba(47, 91, 255, .6); }
+  .btn--ghost:hover { border-color: #b9c4dc; color: var(--text); }
+  .btn--pill:hover { background: #2f5bff; color: #fff; }
+}
+
+/* Cartes, étapes, projets */
+.card, .project, .values div, .form {
+  background: #fff; border: 1px solid var(--line);
+  box-shadow: var(--shadow); backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+.card::before { background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(47, 91, 255, .06), transparent 45%); }
+.card__icon { background: #eef2ff; border-color: #dbe3ff; }
+.card__icon svg, .contact__list svg { stroke: #2f5bff; }
+.card li { color: #334155; }
+.card li::before { background: #2f5bff; }
+@media (hover: hover) and (pointer: fine) {
+  .card:hover { border-color: #cfd8ea; box-shadow: var(--shadow-lg); }
+}
+.steps::before { background: linear-gradient(90deg, transparent, #c7d2fe, transparent); }
+.step__num { background: #fff; color: #2f5bff; border-color: #c7d2fe; box-shadow: 0 0 0 8px #f7f8fb, 0 4px 14px -6px rgba(47, 91, 255, .35); }
+
+.filter { background: #fff; color: #4a5368; border-color: var(--line-strong); }
+.filter.is-active { background: #0f172a; color: #fff; border-color: transparent; }
+@media (hover: hover) and (pointer: fine) {
+  .filter:hover:not(.is-active) { color: var(--text); border-color: #b9c4dc; }
+}
+.project { overflow: hidden; }
+.project__info span { color: #2f5bff; }
+.project__info h3 { color: var(--text); }
+
+/* À propos */
+.values strong { color: var(--text); }
+.values span { color: var(--muted); }
+.about__logo { background: radial-gradient(120% 90% at 50% 20%, #16244a 0%, #0b1220 70%); border-radius: 28px; padding: clamp(28px, 5vw, 56px); box-shadow: var(--shadow-lg); }
+.about__logo img { filter: drop-shadow(0 10px 30px rgba(233, 196, 106, .22)); }  /* le logo doré garde un fond sombre pour rester lisible */
+
+/* Contact et formulaire */
+.contact__list li, .contact__list a { color: var(--text); }
+.contact__list svg { border-color: var(--line-strong); background: #fff; }
+.form label { color: #334155; }
+.form input, .form select, .form textarea { background: #f7f8fb; color: var(--text); border-color: var(--line-strong); }
+.form input:focus, .form select:focus, .form textarea:focus { background: #fff; border-color: #2f5bff; box-shadow: 0 0 0 4px rgba(47, 91, 255, .14); }
+.form .is-invalid { border-color: #e5484d; box-shadow: 0 0 0 4px rgba(229, 72, 77, .12); }
+.form__status { color: #1f45e0; }
+.form__status.is-success::before { color: #2f5bff; }
+
+/* Pied de page : bande sombre, pour que le logo doré reste lisible */
+.footer { background: #0b1220; border-top: 0; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.footer p { color: #94a3b8; }
+.footer__copy a { color: #cbd5e1; }
+.footer__logo img { filter: drop-shadow(0 8px 28px rgba(233, 196, 106, .2)); }
+.footer__credit { background: rgba(255, 255, 255, .05); border-color: rgba(255, 255, 255, .12); color: #94a3b8; }
+.footer__credit-logo { color: #8fa8ff; }
+@media (hover: hover) and (pointer: fine) {
+  .footer__credit-logo:hover span { color: #b8c8ff; }
+}
+
+/* Focus clavier visible */
+.btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline-color: #2f5bff; }
