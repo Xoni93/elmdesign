@@ -382,3 +382,25 @@ h1, h2, h3 { font-weight: 600; letter-spacing: -0.035em; }
 .footer__credit-logo{display:inline-flex;align-items:center;gap:8px;color:var(--gold-300);font-weight:600;text-decoration:none}
 .footer__credit-logo img{height:24px;width:auto}
 .footer__credit-logo:hover span{color:var(--gold-400)}
+
+/* =========================================================
+   Finitions des animations (règles d'Emil Kowalski)
+   ========================================================= */
+/* Filtres : on anime seulement ce qui change (au lieu de « all ») */
+.filter { transition: color .3s ease, border-color .3s ease, transform 120ms var(--ease); }
+
+/* Retour au toucher : le bouton s'enfonce légèrement quand on appuie */
+.btn:active, .filter:active { transform: scale(.97); transition-duration: 120ms; }
+
+/* Sur écran tactile, pas d'effet de survol qui reste « bloqué » après un toucher */
+@media (hover: none), (pointer: coarse) {
+  .btn--gold:hover, .btn--ghost:hover, .project:hover, .footer__logo:hover img,
+  .project:hover .project__mock > * { transform: none; }
+  .project:hover { box-shadow: none; }
+  .btn--gold:active, .btn--ghost:active { transform: scale(.97); }
+}
+
+/* Message du formulaire : apparaît en fondu au lieu de surgir */
+.form__status.is-shown { animation: statusIn 200ms var(--ease); }
+.form__status.is-success::before { content: "✓"; display: inline-block; margin-right: .45em; color: var(--gold-400); font-weight: 700; }
+@keyframes statusIn { from { opacity: 0; transform: translateY(4px); } }
