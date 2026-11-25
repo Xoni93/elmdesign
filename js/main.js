@@ -154,10 +154,10 @@
   });
 
   /* ---------- Formulaire de contact ----------
-     Sans serveur : ouvre la messagerie du visiteur avec le message pré-rempli.
-     Pour un envoi direct, branchez un service (Formspree, Netlify Forms, etc.). */
+     Les demandes partent directement via Formspree et arrivent dans la boîte e-mail de l'entreprise. */
   const status = document.getElementById('formStatus');
   const CONTACT_EMAIL = 'elmdesign74@gmail.com';
+  const FORM_ENDPOINT = 'https://formspree.io/f/mgakdrod';
   // Affiche le message sous le formulaire avec un fondu (relancé à chaque nouveau message)
   const showStatus = (text, success) => {
     status.textContent = text;
@@ -166,7 +166,8 @@
     void status.offsetWidth;
     status.classList.add('is-shown');
   };
-  form.addEventListener('submit', e => {
+  const submitBtn = form.querySelector('button[type="submit"]');
+  form.addEventListener('submit', async e => {
     e.preventDefault();
     let valid = true;
     form.querySelectorAll('[required]').forEach(f => {
@@ -176,11 +177,21 @@
     });
     if (!valid) { showStatus('Merci de remplir tous les champs correctement.', false); return; }
     const d = new FormData(form);
-    const subject = `Demande de devis — ${d.get('type')}`;
-    const body = `Nom : ${d.get('nom')}\nE-mail : ${d.get('email')}\nProjet : ${d.get('type')}\n\n${d.get('message')}`;
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    showStatus('Merci ! Votre messagerie va s’ouvrir pour envoyer la demande.', true);
-    form.reset();
+    d.append('_subject', `Demande de devis — ${d.get('type')} — ${d.get('nom')}`);
+    const label = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Envoi en cours…';
+    try {
+      const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: d, headers: { Accept: 'application/json' } });
+      if (!res.ok) throw new Error('Formspree ' + res.status);
+      showStatus('Merci ! Votre demande a bien été envoyée. Nous vous répondons rapidement.', true);
+      form.reset();
+    } catch (err) {
+      showStatus(`L’envoi n’a pas abouti. Écrivez-nous directement à ${CONTACT_EMAIL}.`, false);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = label;
+    }
   });
 
   document.getElementById('year').textContent = new Date().getFullYear();
