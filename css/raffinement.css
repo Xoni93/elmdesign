@@ -186,3 +186,15 @@ button, .btn, .filter, .nav__burger { -webkit-user-select: none; user-select: no
 .nav { padding-top: max(18px, env(safe-area-inset-top, 0px)); }
 .nav.is-scrolled { padding-top: max(10px, env(safe-area-inset-top, 0px)); }
 .footer { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+
+/* ---------- 9. Réalisations en ligne (captures réelles) ---------- */
+.project__shot { justify-content: flex-start; padding-top: 26px; background: radial-gradient(circle at 30% 20%, var(--c1), var(--c2) 75%); }  /* la capture « dépasse » en bas, comme un écran qu'on aperçoit */
+.project__shot > * { width: 84%; }
+.project__shot .mock__bar { display: flex; gap: 5px; padding: 7px 10px; background: rgba(255, 255, 255, .9); border-radius: 8px 8px 0 0; }
+.project__shot img { display: block; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .5); }
+.project__desc { margin: 8px 0 0; font-size: .92rem; line-height: 1.5; color: var(--muted); }
+.project__visit { display: inline-flex; align-items: center; gap: .35em; margin: 12px 0 0; font-size: .85rem; font-weight: 600; color: var(--gold-400); }
+.project__visit span { display: inline-block; transition: transform 160ms var(--ease); }
+@media (hover: hover) and (pointer: fine) {
+  .project--real:hover .project__visit span { transform: translate(2px, -2px); }
+}
