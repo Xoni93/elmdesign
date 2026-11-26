@@ -144,3 +144,6 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -.035em; color: var(--text); }
 /* Texte de l'accueil un peu plus foncé : il reste lisible au-dessus de la vidéo */
 .hero__sub { color: #334155; }
 .hero__logos p { color: #5b6478; }
+
+/* Fond de la barre de navigation après défilement, sur mobile */
+:root { --nav-scrolled-bg: rgba(255, 255, 255, .86); }
