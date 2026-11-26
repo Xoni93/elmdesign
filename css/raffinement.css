@@ -263,4 +263,6 @@ button, .btn, .filter, .nav__burger { -webkit-user-select: none; user-select: no
   /* Dans le menu mobile : pas de pastille ni de point sous le lien actif */
   html .nav__pill { background: none; border: 0; box-shadow: none; }
   .nav__pill a.is-active::after { display: none; }
+  /* L'entrée de la barre se fait en fondu seul : un décalage (transform) enfermerait aussi le menu */
+  html .nav.stagger-nav.stagger-nav { transform: none; }
 }
