@@ -732,15 +732,64 @@ const sE = {
 
 
 /* ===== Hôte — boucle requestAnimationFrame (portée telle quelle du prompt) =====
-   Seul changement : pas de fond sombre peint derrière les cartes, pour garder
-   le fond clair du site (#f7f8fb). Pause quand la section est hors écran. */
+   Changements : pas de fond sombre peint derrière les cartes, pour garder
+   le fond clair du site (#f7f8fb). Pause quand la section est hors écran,
+   arrêt au survol d'une carte, clic = ouverture du projet. */
 const TEMPLATE = sE;
 const DPR_CAP = 2;
-const LOOP_SECONDS = 14.0;
-const PARAMS = {"cornerRadius":3,"padding":6,"shadowEnabled":false,"cardSize":37,"cardAspect":"1:1","ringSize":131,"tilt":0,"perspective":55,"backFade":55,"direction":"right","motion":"steps","offsetX":0,"offsetY":0,"backgroundType":"color","background":"rgba(0,0,0,0)"};
+const LOOP_SECONDS = 28.0;
+const PARAMS = {"cornerRadius":3,"padding":6,"shadowEnabled":false,"cardSize":70,"cardAspect":"1:1","ringSize":200,"tilt":0,"perspective":55,"backFade":55,"direction":"right","motion":"steps","offsetX":0,"offsetY":0,"backgroundType":"color","background":"rgba(0,0,0,0)"};
 
-function mount(container, canvas, images) {
+/* Même projection que render() : les 4 coins de chaque carte à l'écran, de l'avant vers l'arrière.
+   Sert uniquement à savoir quelle carte est sous le curseur (pause + clic). */
+function cardQuads(t, a, r, params, images) {
+  const u = k5(a, r),
+    d = G6(a, r, H(params, "padding", 6)),
+    ease = w5(he(params, "easing", "smooth"), H(params, "easeAmount", 60), he(params, "easeBezier", "")),
+    ox = u * H(params, "offsetX", 0),
+    oy = u * H(params, "offsetY", 0),
+    h = u * H(params, "cardSize", 37),
+    f = h * et(he(params, "cardAspect", "1:1"), { images }),
+    p = (Math.min(d.w, d.h) / 2) * (H(params, "ringSize", 131) / 100),
+    m = (H(params, "tilt", 0) * Math.PI) / 180,
+    b = Math.cos(m),
+    y = Math.sin(m),
+    _ = p * (8 - 5.6 * (H(params, "perspective", 55) / 100)),
+    E = he(params, "direction", "right") === "right" ? 1 : -1,
+    k = a / 2,
+    A = r / 2,
+    C = Math.max(4, images.length),
+    X = f / 2;
+  let I;
+  if (he(params, "motion", "steps") === "flow") I = E * 2 * Math.PI * t;
+  else {
+    const { index: Y, local: F } = Mt(t, C);
+    I = (E * 2 * Math.PI * (Y + ease(xe(F, 0, 0.55)))) / C;
+  }
+  const z = (2 * Math.PI * 0.1) / C;
+  return Array.from({ length: C }, (_unused, i) => {
+    const phi = I + (2 * Math.PI * i) / C + z, F = Math.cos(phi), Q = Math.sin(phi);
+    const P = (be, Ee) => {
+      const ye = p * Q + be * F, ke = p * F - be * Q, Te = Ee * b - ke * y, Se = Ee * y + ke * b, $e = _ / (_ - Se);
+      return [k + ye * $e + ox, A - Te * $e + oy];
+    };
+    return { i, depth: F, quad: [P(-X, -h / 2), P(X, -h / 2), P(X, h / 2), P(-X, h / 2)] };
+  }).sort((s1, s2) => s2.depth - s1.depth);
+}
+
+function inQuad(x, y, q) {
+  let sign = 0;
+  for (let n = 0; n < 4; n++) {
+    const [x1, y1] = q[n], [x2, y2] = q[(n + 1) % 4];
+    const c = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
+    if (c !== 0) { if (sign && Math.sign(c) !== sign) return false; sign = Math.sign(c); }
+  }
+  return true;
+}
+
+function mount(container, canvas, images, links) {
   const ctx = canvas.getContext("2d");
+  let hovered = -1; // carte sous le curseur (-1 = aucune) : l'anneau s'arrête tant qu'elle est survolée
   const resize = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP);
     canvas.width = Math.round(container.clientWidth * dpr);
@@ -755,13 +804,32 @@ function mount(container, canvas, images) {
     TEMPLATE.render({ ctx, t, width: canvas.width, height: canvas.height, params: PARAMS, images, background: null });
   };
   new ResizeObserver(() => { resize(); draw(); }).observe(container);
+
+  // Quelle carte est sous le pointeur ? (la plus en avant gagne)
+  const hit = (ev) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (ev.clientX - rect.left) * (canvas.width / rect.width);
+    const y = (ev.clientY - rect.top) * (canvas.height / rect.height);
+    for (const c of cardQuads(t, canvas.width, canvas.height, PARAMS, images)) if (inQuad(x, y, c.quad)) return c.i;
+    return -1;
+  };
+  canvas.addEventListener("pointermove", (ev) => {
+    hovered = ev.pointerType === "mouse" ? hit(ev) : -1;
+    canvas.style.cursor = hit(ev) >= 0 ? "pointer" : "";
+  });
+  canvas.addEventListener("pointerleave", () => { hovered = -1; canvas.style.cursor = ""; });
+  canvas.addEventListener("click", (ev) => {
+    const i = hit(ev);
+    const url = i >= 0 ? links[i % links.length] : null;
+    if (url) window.open(url, "_blank", "noopener");
+  });
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) { draw(); return; }
   let visible = true, running = false;
   const tick = (now) => {
     if (!visible) { running = false; return; }
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
-    t = (t + dt / LOOP_SECONDS) % 1;
+    if (hovered < 0) t = (t + dt / LOOP_SECONDS) % 1;
     draw();
     requestAnimationFrame(tick);
   };
@@ -776,6 +844,7 @@ const stage = document.querySelector(".halo");
 if (stage) {
   const canvas = stage.querySelector("canvas");
   const srcs = (stage.dataset.images || "").split(",").map((s) => s.trim()).filter(Boolean);
+  const links = (stage.dataset.links || "").split(",").map((s) => s.trim()).filter(Boolean);
   Promise.all(srcs.map((s) => new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(undefined); im.src = s; })))
-    .then((loaded) => mount(stage, canvas, Array.from({ length: 8 }, (_, i) => loaded[i % loaded.length])));
+    .then((loaded) => mount(stage, canvas, Array.from({ length: 8 }, (_, i) => loaded[i % loaded.length]), Array.from({ length: 8 }, (_, i) => links[i % links.length])));
 }
