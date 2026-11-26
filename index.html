@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <title>ELM Design — Création de sites web & applications mobiles</title>
   <meta name="description" content="ELM Design conçoit des sites web et des applications mobiles modernes, rapides et sur mesure pour les entreprises et indépendants.">
   <meta name="theme-color" content="#f7f8fb">
@@ -245,8 +245,8 @@
         </div>
         <form class="form reveal" id="contactForm" novalidate>
           <div class="form__row">
-            <label>Nom<input type="text" name="nom" required autocomplete="name"></label>
-            <label>E-mail<input type="email" name="email" required autocomplete="email"></label>
+            <label>Nom<input type="text" name="nom" required autocomplete="name" autocapitalize="words" enterkeyhint="next"></label>
+            <label>E-mail<input type="email" name="email" required autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next"></label>
           </div>
           <label>Type de projet
             <select name="type">
