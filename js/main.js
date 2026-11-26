@@ -55,16 +55,21 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  const closeMenu = () => {
-    links.classList.remove('is-open');
-    burger.setAttribute('aria-expanded', 'false');
-  };
-  burger.addEventListener('click', () => {
-    const open = links.classList.toggle('is-open');
+  // Menu mobile : la page derrière ne défile plus tant qu'il est ouvert
+  const setMenu = open => {
+    links.classList.toggle('is-open', open);
     burger.setAttribute('aria-expanded', String(open));
-  });
+    document.documentElement.classList.toggle('menu-open', open);
+    if (window.lenis) open ? window.lenis.stop() : window.lenis.start();
+  };
+  const closeMenu = () => { if (links.classList.contains('is-open')) setMenu(false); };
+  burger.addEventListener('click', () => setMenu(!links.classList.contains('is-open')));
   links.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+  // Toucher en dehors du menu le referme
+  document.addEventListener('pointerdown', e => {
+    if (links.classList.contains('is-open') && !links.contains(e.target) && !burger.contains(e.target)) closeMenu();
+  });
 
   /* ---------- Lien actif selon la section visible ---------- */
   const sections = [...document.querySelectorAll('main section[id]')];
