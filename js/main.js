@@ -46,6 +46,45 @@
   });
   requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add('is-loaded')));
 
+  /* ---------- Effet machine à écrire sur le mot doré du titre ----------
+     « briller » s'efface lettre par lettre puis laisse place au mot suivant, avec un curseur qui clignote.
+     Le titre lu par les lecteurs d'écran reste fixe (aria-label), et rien ne bouge si l'utilisateur
+     a demandé moins d'animations. */
+  const twWord = document.querySelector('.hero__title .word--gold');
+  if (twWord && !reduceMotion) {
+    const WORDS = ['briller', 'grandir', 'rayonner', 'décoller'];
+    const TYPE_MS = 70, DELETE_MS = 40, HOLD_MS = 1600, START_MS = 2200;
+    const textEl = document.createElement('span');
+    const caret = document.createElement('span');
+    caret.className = 'tw-caret';
+    textEl.textContent = twWord.textContent;
+    twWord.textContent = '';
+    twWord.classList.add('tw');
+    twWord.append(textEl, caret);
+    // Réserve la largeur du mot le plus long : la fin du titre ne saute pas à chaque lettre
+    const reserve = () => {
+      const current = textEl.textContent;
+      let max = 0;
+      WORDS.forEach(w => { textEl.textContent = w; max = Math.max(max, textEl.getBoundingClientRect().width); });
+      textEl.textContent = current;
+      twWord.style.minWidth = Math.ceil(max + caret.getBoundingClientRect().width + 4) + 'px';
+    };
+    (document.fonts ? document.fonts.ready : Promise.resolve()).then(reserve);
+    window.addEventListener('resize', reserve, { passive: true });
+
+    let index = 0, text = WORDS[0], deleting = true;
+    const tick = () => {
+      if (document.hidden) return setTimeout(tick, 500);
+      const word = WORDS[index % WORDS.length];
+      if (!deleting && text === word) { deleting = true; return setTimeout(tick, HOLD_MS); }
+      if (deleting && text === '') { deleting = false; index++; return setTimeout(tick, 200); }
+      text = deleting ? text.slice(0, -1) : word.slice(0, text.length + 1);
+      textEl.textContent = text;
+      setTimeout(tick, deleting ? DELETE_MS : TYPE_MS);
+    };
+    setTimeout(tick, START_MS + HOLD_MS);
+  }
+
   /* ---------- Navigation : fond au scroll + menu mobile ---------- */
   const nav = document.getElementById('nav');
   const burger = document.getElementById('burger');
