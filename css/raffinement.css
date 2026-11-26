@@ -276,3 +276,32 @@ button, .btn, .filter, .nav__burger { -webkit-user-select: none; user-select: no
   animation: tw-blink 1s steps(1) infinite;
 }
 @keyframes tw-blink { 50% { opacity: 0; } }
+
+/* ---------- 12. Boutons « shimmer » : un reflet lumineux traverse le bouton ----------
+   Mêmes couleurs qu'avant : le reflet est un simple voile blanc translucide qui passe
+   derrière le texte, et une lueur douce apparaît au survol (souris uniquement). */
+.btn--gold, .btn--pill, .btn--ghost { position: relative; overflow: hidden; isolation: isolate; }
+.btn--gold::after, .btn--pill::after, .btn--ghost::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(110deg, transparent 25%, var(--shimmer, rgba(255, 255, 255, .4)) 50%, transparent 75%);
+  transform: translateX(-100%);
+  animation: btn-sweep 2.6s ease-in-out infinite;
+}
+.btn--gold { --shimmer: rgba(255, 255, 255, .42); }
+.btn--pill { --shimmer: rgba(255, 255, 255, .28); }
+.btn--ghost { --shimmer: rgba(47, 91, 255, .12); }
+.btn--pill::after { animation-delay: .9s; }   /* les reflets ne passent pas tous en même temps */
+.btn--ghost::after { animation-delay: .45s; }
+@keyframes btn-sweep {
+  0% { transform: translateX(-100%); }
+  55%, 100% { transform: translateX(100%); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .btn--gold:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 1px 2px rgba(15, 23, 42, .12), 0 0 30px -6px rgba(47, 91, 255, .75); }
+  .btn--pill:hover { box-shadow: 0 0 30px -6px rgba(47, 91, 255, .55); }
+  .btn--ghost:hover { box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 0 26px -8px rgba(47, 91, 255, .35); }
+}
+/* Mouvement réduit : pas de reflet qui défile */
+@media (prefers-reduced-motion: reduce) {
+  .btn--gold::after, .btn--pill::after, .btn--ghost::after { animation: none; display: none; }
+}
