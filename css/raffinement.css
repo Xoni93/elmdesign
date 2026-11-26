@@ -266,3 +266,13 @@ button, .btn, .filter, .nav__burger { -webkit-user-select: none; user-select: no
   /* L'entrée de la barre se fait en fondu seul : un décalage (transform) enfermerait aussi le menu */
   html .nav.stagger-nav.stagger-nav { transform: none; }
 }
+
+/* ---------- 11. Machine à écrire sur le mot doré de l'accueil ---------- */
+.word--gold.tw { text-align: left; white-space: nowrap; }
+.tw-caret {
+  display: inline-block; width: 3px; height: .9em; margin-left: 2px; vertical-align: -.08em;
+  border-radius: 2px; background: var(--gold-400);
+  -webkit-text-fill-color: initial;
+  animation: tw-blink 1s steps(1) infinite;
+}
+@keyframes tw-blink { 50% { opacity: 0; } }
