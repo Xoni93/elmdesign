@@ -6,6 +6,7 @@
   <title>ELM Design — Création de sites web & applications mobiles</title>
   <meta name="description" content="ELM Design conçoit des sites web et des applications mobiles modernes, rapides et sur mesure pour les entreprises et indépendants.">
   <meta name="theme-color" content="#05050A">
+  <meta name="color-scheme" content="dark">
   <link rel="icon" href="assets/logo-mark.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,10 +18,10 @@
 
   <!-- Vidéo de fond (validée) sous un voile sombre, puis réseau de particules par-dessus -->
   <div class="bg-video" id="bgVideo" aria-hidden="true">
-    <video autoplay loop muted playsinline preload="auto" src="assets/background.mp4"></video>
+    <video autoplay loop muted playsinline preload="auto" poster="assets/background-poster.webp" src="assets/background.mp4"></video>
     <div class="bg-video__veil"></div>
   </div>
-  <canvas id="bg-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0" aria-hidden="true"></canvas>
+  <canvas id="bg-canvas" class="fixed left-0 top-0 w-full pointer-events-none z-0" aria-hidden="true"></canvas>
 
   <!-- Orbes d'ambiance (dans un calque fixe pour ne jamais déborder sur mobile) -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
@@ -39,10 +40,10 @@
               <i class="fa-solid fa-code text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 text-lg"></i>
             </div>
           </div>
-          <span class="font-extrabold text-xl tracking-tight text-white">ELM<span class="text-cyan-400"> Design</span></span>
+          <span class="font-extrabold text-xl tracking-tight text-white whitespace-nowrap">ELM<span class="text-cyan-400"> Design</span></span>
         </a>
 
-        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+        <div class="hidden lg:flex items-center gap-8 text-sm font-medium text-slate-300 whitespace-nowrap">
           <a href="#services" class="nav-link">Services</a>
           <a href="#processus" class="nav-link">Méthode</a>
           <a href="#portfolio" class="nav-link">Réalisations</a>
@@ -51,23 +52,23 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <a href="#contact" class="btn-shimmer hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/40 transition-all transform hover:-translate-y-0.5">
+          <a href="#contact" class="btn-shimmer hidden sm:inline-flex items-center gap-2 whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/40 transition-all transform hover:-translate-y-0.5">
             <span>Demander un devis</span>
             <i class="fa-solid fa-arrow-right text-xs"></i>
           </a>
-          <button id="mobile-menu-btn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu" class="md:hidden p-2.5 rounded-xl glass text-slate-200 hover:text-white">
+          <button id="mobile-menu-btn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu" class="lg:hidden w-11 h-11 flex items-center justify-center rounded-xl glass text-slate-200 hover:text-white press">
             <i class="fa-solid fa-bars text-lg"></i>
           </button>
         </div>
       </nav>
 
-      <div id="mobile-menu" class="hidden md:hidden mt-2 glass-strong rounded-2xl p-5 border border-white/10 shadow-2xl">
+      <div id="mobile-menu" class="hidden lg:hidden mt-2 glass-strong rounded-2xl p-5 border border-white/10 shadow-2xl">
         <div class="flex flex-col gap-4 text-base font-medium text-slate-300">
-          <a href="#services" class="mobile-link hover:text-cyan-400 transition-colors py-1">Services</a>
-          <a href="#processus" class="mobile-link hover:text-cyan-400 transition-colors py-1">Méthode</a>
-          <a href="#portfolio" class="mobile-link hover:text-cyan-400 transition-colors py-1">Réalisations</a>
-          <a href="#simulateur" class="mobile-link hover:text-cyan-400 transition-colors py-1">Simulateur de devis</a>
-          <a href="#apropos" class="mobile-link hover:text-cyan-400 transition-colors py-1">À propos</a>
+          <a href="#services" class="mobile-link press hover:text-cyan-400 transition-colors py-2.5 -mx-2 px-2 rounded-lg">Services</a>
+          <a href="#processus" class="mobile-link press hover:text-cyan-400 transition-colors py-2.5 -mx-2 px-2 rounded-lg">Méthode</a>
+          <a href="#portfolio" class="mobile-link press hover:text-cyan-400 transition-colors py-2.5 -mx-2 px-2 rounded-lg">Réalisations</a>
+          <a href="#simulateur" class="mobile-link press hover:text-cyan-400 transition-colors py-2.5 -mx-2 px-2 rounded-lg">Simulateur de devis</a>
+          <a href="#apropos" class="mobile-link press hover:text-cyan-400 transition-colors py-2.5 -mx-2 px-2 rounded-lg">À propos</a>
           <a href="#contact" class="mobile-link btn-shimmer mt-2 text-center px-5 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-500">Demander un devis</a>
         </div>
       </div>
@@ -77,7 +78,7 @@
   <main class="relative z-10">
 
     <!-- 2. ACCUEIL -->
-    <section id="accueil" class="min-h-screen min-h-[100svh] flex items-center pt-28 pb-20 px-4 sm:px-6 lg:px-8">
+    <section id="accueil" class="min-h-[100svh] flex items-center pt-28 pb-20 px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
         <div class="lg:col-span-7 space-y-8">
@@ -403,11 +404,11 @@
             <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Parlons de <span class="text-gradient">votre projet</span></h2>
             <p class="text-slate-400 leading-relaxed">Décrivez-nous votre idée en quelques lignes : nous revenons vers vous rapidement avec des pistes et un devis gratuit.</p>
             <div class="space-y-4 pt-4">
-              <a href="mailto:elmdesign74@gmail.com" class="flex items-center gap-4 glass p-4 rounded-2xl hover:border-cyan-400/40 transition-colors">
+              <a href="mailto:elmdesign74@gmail.com" class="press flex items-center gap-4 glass p-4 rounded-2xl hover:border-cyan-400/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400"><i class="fa-solid fa-envelope"></i></div>
                 <div><div class="text-xs text-slate-400">E-mail</div><div class="font-semibold text-white break-all">elmdesign74@gmail.com</div></div>
               </a>
-              <a href="tel:+33787197311" class="flex items-center gap-4 glass p-4 rounded-2xl hover:border-cyan-400/40 transition-colors">
+              <a href="tel:+33787197311" class="press flex items-center gap-4 glass p-4 rounded-2xl hover:border-cyan-400/40 transition-colors">
                 <div class="w-11 h-11 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400"><i class="fa-solid fa-phone"></i></div>
                 <div><div class="text-xs text-slate-400">Téléphone</div><div class="font-semibold text-white">07 87 19 73 11</div></div>
               </a>
@@ -452,7 +453,7 @@
         <footer class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 text-center sm:text-left">
           <div class="flex flex-col sm:flex-row items-center gap-2">
             <span class="font-bold text-white">ELM<span class="text-cyan-400"> Design</span></span>
-            <span>— © <span id="year"></span> Tous droits réservés · <a href="#" class="hover:text-white">Mentions légales</a></span>
+            <span>— © <span id="year"></span> Tous droits réservés · <a href="#" class="inline-block py-2 hover:text-white">Mentions légales</a></span>
           </div>
           <div>Site conçu et développé par <a href="https://elmdesign.fr" class="text-slate-300 hover:text-white">ELM Design</a></div>
         </footer>

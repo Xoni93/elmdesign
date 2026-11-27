@@ -53,7 +53,7 @@
     };
     const resize = () => {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = innerWidth; H = innerHeight;
+      W = canvas.clientWidth || innerWidth; H = canvas.clientHeight || innerHeight; // taille CSS réelle (100lvh)
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       init();
@@ -75,7 +75,7 @@
       requestAnimationFrame(frame);
     };
     let lastW = innerWidth;
-    addEventListener('resize', () => { if (innerWidth !== lastW || Math.abs(innerHeight - H) > 120) { lastW = innerWidth; resize(); } });
+    addEventListener('resize', () => { if (innerWidth !== lastW || Math.abs(canvas.clientHeight - H) > 1) { lastW = innerWidth; resize(); } }); // la barre d'adresse mobile ne change pas 100lvh : pas de réinitialisation en défilant
     if (finePointer) {
       addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; }, { passive: true });
       document.addEventListener('mouseleave', () => { mouse.x = mouse.y = null; });
