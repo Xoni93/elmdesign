@@ -20,12 +20,27 @@ body { background: transparent; color: #F8FAFC; overflow-x: clip; }
 ::-webkit-scrollbar-track { background: #05050A; }
 ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #8B5CF6, #06B6D4); border-radius: 4px; }
 a, button, [role="button"], label { touch-action: manipulation; }
-button, [role="button"], [role="radio"] { -webkit-user-select: none; user-select: none; }
+button, [role="button"], [role="radio"], .btn-shimmer, .mobile-link, .sim-feature, .nav-link {
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+
+/* Zones sûres (encoche, Dynamic Island, barre d'accueil) — viewport-fit=cover est déjà dans le meta */
+body { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+#navbar { top: env(safe-area-inset-top, 0px); padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+#toast-notification { bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
+#contact { padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px)); }
+
+/* Retour au toucher : réaction dès que le doigt se pose */
+.press, .sim-type-btn, .sim-feature { transition: transform 120ms var(--ease), background-color 150ms ease, border-color 150ms ease; }
+.press:active, .sim-type-btn:active, .sim-feature:active { transform: scale(.97); }
+.mobile-link:active { background: rgba(255, 255, 255, .06); }
 section[id] { scroll-margin-top: 96px; }
 :focus-visible { outline: 2px solid #22D3EE; outline-offset: 3px; border-radius: 8px; }
 
 /* ---------- Vidéo de fond (validée) sous un voile sombre ---------- */
-.bg-video { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg-primary); }
+/* 100lvh : le fond garde sa taille quand la barre d'adresse mobile apparaît/disparaît (pas de saut) */
+.bg-video { position: fixed; left: 0; right: 0; top: 0; height: 100vh; height: 100lvh; z-index: -1; overflow: hidden; background: var(--bg-primary) url(../assets/background-poster.webp) center / cover; }
+#bg-canvas { height: 100vh; height: 100lvh; }
 .bg-video video { width: 100%; height: 100%; object-fit: cover; opacity: .55; filter: saturate(.85); }
 .bg-video__veil {
   position: absolute; inset: 0;
@@ -112,7 +127,7 @@ section[id] { scroll-margin-top: 96px; }
 .process-line-progress { transition: width 1.2s cubic-bezier(.22, 1, .36, 1); }
 
 /* Curseur de délai */
-input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; height: 22px; }
+input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; height: 36px; touch-action: pan-y; } /* zone de toucher plus haute ; le défilement vertical reste possible */
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%; margin-top: -8px; cursor: pointer;
   background: linear-gradient(135deg, #8B5CF6, #06B6D4); box-shadow: 0 0 15px rgba(6, 182, 212, .8); border: 2px solid #fff;
