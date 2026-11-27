@@ -1,172 +1,251 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
   <title>ELM Design — Création de sites web & applications mobiles</title>
   <meta name="description" content="ELM Design conçoit des sites web et des applications mobiles modernes, rapides et sur mesure pour les entreprises et indépendants.">
-  <meta name="theme-color" content="#f7f8fb">
+  <meta name="theme-color" content="#05050A">
   <link rel="icon" href="assets/logo-mark.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&family=Instrument+Serif:ital@1&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/fond-video.css">
-  <link rel="stylesheet" href="css/raffinement.css">
-  <link rel="stylesheet" href="css/theme-clair.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/site.css">
 </head>
-<body>
-  <!-- Vidéo de fond fixe derrière tout le site (bureau au sommet d'une montagne au coucher du soleil) -->
+<body class="antialiased font-sans selection:bg-purple-500/30 selection:text-cyan-200">
+
+  <!-- Vidéo de fond (validée) sous un voile sombre, puis réseau de particules par-dessus -->
   <div class="bg-video" id="bgVideo" aria-hidden="true">
-    <video autoplay loop muted playsinline preload="auto"
-      src="assets/background.mp4"></video>
-    <div class="bg-video__shade"></div>
-    <div class="bg-video__dim"></div>
+    <video autoplay loop muted playsinline preload="auto" src="assets/background.mp4"></video>
+    <div class="bg-video__veil"></div>
+  </div>
+  <canvas id="bg-canvas" class="fixed inset-0 w-full h-full pointer-events-none z-0" aria-hidden="true"></canvas>
+
+  <!-- Orbes d'ambiance (dans un calque fixe pour ne jamais déborder sur mobile) -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0" aria-hidden="true">
+    <div class="ambient-orb w-[500px] h-[500px] bg-purple-600 -top-48 -left-48 animate-pulse-slow"></div>
+    <div class="ambient-orb w-[600px] h-[600px] bg-cyan-600 top-[35%] -right-64 animate-pulse-slow"></div>
+    <div class="ambient-orb w-[500px] h-[500px] bg-indigo-700 -bottom-40 left-1/4 animate-pulse-slow"></div>
   </div>
 
-  <!-- ===== Navigation ===== -->
-  <header class="nav stagger-nav" id="nav">
-    <div class="container nav__inner">
-      <a href="#accueil" class="nav__brand" aria-label="ELM Design — accueil">
-        <span>ELM <em>Design</em></span>
-      </a>
-      <nav class="nav__links" id="navLinks" aria-label="Navigation principale">
-        <div class="nav__pill">
-          <a href="#services">Services</a>
-          <a href="#methode">Méthode</a>
-          <a href="#realisations">Réalisations</a>
-          <a href="#apropos">À propos</a>
+  <!-- 1. NAVIGATION -->
+  <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="glass rounded-2xl px-6 py-3.5 flex items-center justify-between shadow-2xl shadow-black/50" aria-label="Navigation principale">
+        <a href="#accueil" class="flex items-center gap-3 group" aria-label="ELM Design — accueil">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-500 p-[1px] shadow-lg shadow-purple-500/25 group-hover:scale-105 transition-transform">
+            <div class="w-full h-full bg-[#080A12] rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-code text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 text-lg"></i>
+            </div>
+          </div>
+          <span class="font-extrabold text-xl tracking-tight text-white">ELM<span class="text-cyan-400"> Design</span></span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+          <a href="#services" class="nav-link">Services</a>
+          <a href="#processus" class="nav-link">Méthode</a>
+          <a href="#portfolio" class="nav-link">Réalisations</a>
+          <a href="#simulateur" class="nav-link">Simulateur</a>
+          <a href="#apropos" class="nav-link">À propos</a>
         </div>
-        <a href="#contact" class="btn btn--pill">Demander un devis</a>
+
+        <div class="flex items-center gap-3">
+          <a href="#contact" class="btn-shimmer hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 shadow-lg shadow-purple-500/25 hover:shadow-cyan-500/40 transition-all transform hover:-translate-y-0.5">
+            <span>Demander un devis</span>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
+          </a>
+          <button id="mobile-menu-btn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mobile-menu" class="md:hidden p-2.5 rounded-xl glass text-slate-200 hover:text-white">
+            <i class="fa-solid fa-bars text-lg"></i>
+          </button>
+        </div>
       </nav>
-      <button class="nav__burger" id="burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks">
-        <span></span><span></span><span></span>
-      </button>
+
+      <div id="mobile-menu" class="hidden md:hidden mt-2 glass-strong rounded-2xl p-5 border border-white/10 shadow-2xl">
+        <div class="flex flex-col gap-4 text-base font-medium text-slate-300">
+          <a href="#services" class="mobile-link hover:text-cyan-400 transition-colors py-1">Services</a>
+          <a href="#processus" class="mobile-link hover:text-cyan-400 transition-colors py-1">Méthode</a>
+          <a href="#portfolio" class="mobile-link hover:text-cyan-400 transition-colors py-1">Réalisations</a>
+          <a href="#simulateur" class="mobile-link hover:text-cyan-400 transition-colors py-1">Simulateur de devis</a>
+          <a href="#apropos" class="mobile-link hover:text-cyan-400 transition-colors py-1">À propos</a>
+          <a href="#contact" class="mobile-link btn-shimmer mt-2 text-center px-5 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-600 to-cyan-500">Demander un devis</a>
+        </div>
+      </div>
     </div>
   </header>
 
-  <main>
-    <!-- ===== Accueil : vidéo en fond ===== -->
-    <section class="hero" id="accueil">
-      <div class="hero__col">
-        <p class="hero__badge stagger" data-delay="150">Création sites web &amp; applications mobiles</p>
-        <h1 class="hero__title words" data-delay="250" data-stagger="85" data-dur="720" data-y="26">Des sites qui font *briller* votre entreprise</h1>
-        <p class="hero__sub words" data-delay="850" data-stagger="22" data-dur="600" data-y="14">ELM Design imagine et développe des sites web et des applications mobiles élégants, rapides et pensés pour convertir vos visiteurs en clients.</p>
-        <div class="hero__actions stagger" data-delay="1200">
-          <a href="#contact" class="btn btn--gold">Demander un devis
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
-          <a href="#services" class="btn btn--ghost">Découvrir nos services</a>
+  <main class="relative z-10">
+
+    <!-- 2. ACCUEIL -->
+    <section id="accueil" class="min-h-screen min-h-[100svh] flex items-center pt-28 pb-20 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+        <div class="lg:col-span-7 space-y-8">
+          <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass border border-purple-500/30 text-xs sm:text-sm font-medium text-purple-200">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-400"></span>
+            </span>
+            <span>Création sites web &amp; applications mobiles</span>
+          </div>
+
+          <!-- Titre + effet machine à écrire (validé) -->
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15] text-white" aria-label="Des sites qui font briller votre entreprise">
+            <span aria-hidden="true">Des sites qui font <br class="hidden sm:block"><span id="typewriter-text" class="text-gradient">briller</span><span class="typewriter-cursor"></span><br>votre entreprise</span>
+          </h1>
+
+          <p class="text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed">
+            <strong class="text-slate-200">ELM Design</strong> imagine et développe des sites web et des applications mobiles élégants, rapides et pensés pour convertir vos visiteurs en clients.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-4 pt-2">
+            <a href="#simulateur" class="btn-shimmer px-7 py-4 rounded-2xl font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:brightness-110 shadow-xl shadow-purple-600/25 transition-all transform hover:-translate-y-1 flex items-center gap-3">
+              <i class="fa-solid fa-list-check"></i>
+              <span>Décrire mon projet</span>
+            </a>
+            <a href="#portfolio" class="btn-shimmer btn-shimmer--soft px-7 py-4 rounded-2xl font-semibold text-slate-200 glass hover:bg-white/10 border border-white/10 transition-all flex items-center gap-3 group">
+              <span>Voir nos réalisations</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs text-cyan-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <!-- Ce que nous créons (contenu réel, pas de chiffres inventés) -->
+          <div class="grid grid-cols-3 gap-6 pt-6 border-t border-white/10 max-w-lg">
+            <div>
+              <div class="text-xl sm:text-2xl font-extrabold text-white">Sur <span class="text-cyan-400">mesure</span></div>
+              <div class="text-xs sm:text-sm text-slate-400 mt-1">Design &amp; code</div>
+            </div>
+            <div>
+              <div class="text-xl sm:text-2xl font-extrabold text-white">Web <span class="text-purple-400">&amp;</span> mobile</div>
+              <div class="text-xs sm:text-sm text-slate-400 mt-1">Sites, iOS, Android</div>
+            </div>
+            <div>
+              <div class="text-xl sm:text-2xl font-extrabold text-white">Devis <span class="text-cyan-400">gratuit</span></div>
+              <div class="text-xs sm:text-sm text-slate-400 mt-1">Réponse rapide</div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="hero__logos stagger" data-delay="1400">
-        <p>Ce que nous créons</p>
-        <ul>
-          <li>Sites vitrines</li><li>E-commerce</li><li>Applications iOS</li><li>Applications Android</li><li>Référencement</li>
-        </ul>
+
+        <!-- Fenêtre de code 3D -->
+        <div class="lg:col-span-5">
+          <div id="hero-3d-card" class="tilt-card relative rounded-3xl glass p-1 shadow-2xl shadow-purple-900/30 border border-white/15 animate-float">
+            <div class="absolute -inset-1 bg-gradient-to-r from-purple-600 to-cyan-500 rounded-3xl blur-xl opacity-25 -z-10"></div>
+            <div class="bg-[#090B14]/90 rounded-[22px] overflow-hidden">
+              <div class="px-4 py-3 bg-white/[0.03] border-b border-white/10 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+                  <span class="w-3 h-3 rounded-full bg-amber-400/80"></span>
+                  <span class="w-3 h-3 rounded-full bg-emerald-400/80"></span>
+                </div>
+                <span class="font-mono text-xs text-slate-400">votre-projet.js</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">ELM</span>
+              </div>
+              <div class="p-5 font-mono text-xs sm:text-sm leading-relaxed overflow-x-auto">
+                <div class="text-slate-500">// Votre projet, pensé sur mesure</div>
+                <div><span class="text-purple-400">import</span> { <span class="text-cyan-300">design</span>, <span class="text-cyan-300">code</span> } <span class="text-purple-400">from</span> <span class="text-emerald-300">'@elm/atelier'</span>;</div>
+                <br>
+                <div><span class="text-purple-400">export const</span> <span class="text-blue-400">lancer</span> = <span class="text-purple-400">async</span> (<span class="text-amber-300">idee</span>) =&gt; {</div>
+                <div class="pl-4"><span class="text-purple-400">const</span> site = <span class="text-purple-400">await</span> <span class="text-cyan-300">code</span>({</div>
+                <div class="pl-8">type: [<span class="text-emerald-300">'Site vitrine'</span>, <span class="text-emerald-300">'App mobile'</span>],</div>
+                <div class="pl-8">design: <span class="text-emerald-300">'sur mesure'</span>,</div>
+                <div class="pl-8">responsive: <span class="text-purple-400">true</span>,</div>
+                <div class="pl-8">seo: <span class="text-emerald-300">'optimisé'</span></div>
+                <div class="pl-4">});</div>
+                <div class="pl-4"><span class="text-purple-400">return</span> site.enLigne(<span class="text-amber-300">idee</span>);</div>
+                <div>};</div>
+              </div>
+              <div class="p-4 bg-gradient-to-r from-purple-950/50 to-cyan-950/50 border-t border-white/10 grid grid-cols-2 gap-3">
+                <div class="glass rounded-xl p-3 flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400"><i class="fa-solid fa-file-signature"></i></div>
+                  <div>
+                    <div class="text-[11px] text-slate-400">Devis</div>
+                    <div class="text-sm font-bold text-white font-mono">Gratuit</div>
+                  </div>
+                </div>
+                <div class="glass rounded-xl p-3 flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-cyan-500/20 flex items-center justify-center text-cyan-400"><i class="fa-solid fa-user-check"></i></div>
+                  <div>
+                    <div class="text-[11px] text-slate-400">Interlocuteur</div>
+                    <div class="text-sm font-bold text-emerald-400 font-mono">Unique</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
 
-    <!-- ===== Services ===== -->
-    <section class="section" id="services">
-      <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow">Nos services</p>
-          <h2>Tout ce qu'il faut pour exister en ligne</h2>
-          <p>Du premier croquis à la mise en ligne, nous prenons en charge chaque étape de votre projet digital.</p>
+    <!-- 3. SERVICES -->
+    <section id="services" class="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+          <span class="eyebrow-pill text-cyan-400 bg-cyan-500/10 border-cyan-500/20">Nos services</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4">Tout ce qu'il faut pour <span class="text-gradient">exister en ligne</span></h2>
+          <p class="text-slate-400 mt-4 text-base sm:text-lg">Du premier croquis à la mise en ligne, nous prenons en charge chaque étape de votre projet digital.</p>
         </div>
-        <div class="grid grid--3">
-          <article class="card tilt reveal">
-            <div class="card__icon">
-              <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M8 21h8M12 18v3"/></svg>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="glow-card tilt-card glass rounded-3xl p-7 flex flex-col justify-between reveal">
+            <div>
+              <div class="svc-icon from-purple-600/30 to-purple-900/20 border-purple-500/30 text-purple-400 shadow-purple-500/10"><i class="fa-solid fa-display"></i></div>
+              <h3 class="text-xl font-bold text-white mb-3">Sites vitrines</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-6">Un site élégant qui présente votre activité, inspire confiance et donne envie de vous contacter.</p>
             </div>
-            <h3>Sites vitrines</h3>
-            <p>Un site élégant qui présente votre activité, inspire confiance et donne envie de vous contacter.</p>
-            <ul><li>Design sur mesure</li><li>Adapté mobile & tablette</li><li>Formulaire de contact</li></ul>
-          </article>
-          <article class="card tilt reveal">
-            <div class="card__icon">
-              <svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20" r="1.3"/><circle cx="17" cy="20" r="1.3"/></svg>
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10"><span class="tag">Design sur mesure</span><span class="tag">Mobile &amp; tablette</span><span class="tag">Formulaire de contact</span></div>
+          </div>
+          <div class="glow-card tilt-card glass rounded-3xl p-7 flex flex-col justify-between reveal" style="transition-delay:100ms">
+            <div>
+              <div class="svc-icon from-cyan-500/30 to-cyan-900/20 border-cyan-500/30 text-cyan-400 shadow-cyan-500/10"><i class="fa-solid fa-bag-shopping"></i></div>
+              <h3 class="text-xl font-bold text-white mb-3">E-commerce</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-6">Une boutique en ligne simple à gérer, avec paiement sécurisé et un parcours d'achat fluide.</p>
             </div>
-            <h3>E-commerce</h3>
-            <p>Une boutique en ligne simple à gérer, avec paiement sécurisé et un parcours d'achat fluide.</p>
-            <ul><li>Catalogue produits</li><li>Paiement en ligne</li><li>Gestion des commandes</li></ul>
-          </article>
-          <article class="card tilt reveal">
-            <div class="card__icon">
-              <svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 18h4"/></svg>
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10"><span class="tag">Catalogue produits</span><span class="tag">Paiement en ligne</span><span class="tag">Commandes</span></div>
+          </div>
+          <div class="glow-card tilt-card glass rounded-3xl p-7 flex flex-col justify-between reveal" style="transition-delay:200ms">
+            <div>
+              <div class="svc-icon from-pink-500/30 to-purple-900/20 border-pink-500/30 text-pink-400 shadow-pink-500/10"><i class="fa-solid fa-mobile-screen-button"></i></div>
+              <h3 class="text-xl font-bold text-white mb-3">Applications mobiles</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-6">Des applications iOS et Android intuitives, pensées pour vos utilisateurs et votre métier.</p>
             </div>
-            <h3>Applications mobiles</h3>
-            <p>Des applications iOS et Android intuitives, pensées pour vos utilisateurs et votre métier.</p>
-            <ul><li>iPhone & Android</li><li>Interface soignée</li><li>Publication sur les stores</li></ul>
-          </article>
-          <article class="card tilt reveal">
-            <div class="card__icon">
-              <svg viewBox="0 0 24 24"><path d="M4 20l4-4M14.5 4.5l5 5L9 20H4v-5z"/></svg>
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10"><span class="tag">iPhone &amp; Android</span><span class="tag">Interface soignée</span><span class="tag">Publication stores</span></div>
+          </div>
+          <div class="glow-card tilt-card glass rounded-3xl p-7 flex flex-col justify-between reveal">
+            <div>
+              <div class="svc-icon from-indigo-500/30 to-blue-900/20 border-indigo-500/30 text-indigo-400 shadow-indigo-500/10"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+              <h3 class="text-xl font-bold text-white mb-3">Refonte de site</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-6">Votre site a vieilli ? Nous le modernisons pour qu'il soit plus beau, plus rapide et plus efficace.</p>
             </div>
-            <h3>Refonte de site</h3>
-            <p>Votre site a vieilli ? Nous le modernisons pour qu'il soit plus beau, plus rapide et plus efficace.</p>
-            <ul><li>Audit de l'existant</li><li>Nouveau design</li><li>Reprise des contenus</li></ul>
-          </article>
-          <article class="card tilt reveal">
-            <div class="card__icon">
-              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10"><span class="tag">Audit de l'existant</span><span class="tag">Nouveau design</span><span class="tag">Reprise des contenus</span></div>
+          </div>
+          <div class="glow-card tilt-card glass rounded-3xl p-7 flex flex-col justify-between reveal" style="transition-delay:100ms">
+            <div>
+              <div class="svc-icon from-emerald-500/30 to-cyan-900/20 border-emerald-500/30 text-emerald-400 shadow-emerald-500/10"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+              <h3 class="text-xl font-bold text-white mb-3">Référencement (SEO)</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-6">Un site bien construit pour être trouvé sur Google par les clients qui vous cherchent.</p>
             </div>
-            <h3>Référencement (SEO)</h3>
-            <p>Un site bien construit pour être trouvé sur Google par les clients qui vous cherchent.</p>
-            <ul><li>Optimisation technique</li><li>Performances</li><li>Référencement local</li></ul>
-          </article>
-          <article class="card tilt reveal">
-            <div class="card__icon">
-              <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10"><span class="tag">Optimisation technique</span><span class="tag">Performances</span><span class="tag">SEO local</span></div>
+          </div>
+          <div class="glow-card tilt-card glass rounded-3xl p-7 flex flex-col justify-between reveal" style="transition-delay:200ms">
+            <div>
+              <div class="svc-icon from-purple-600/30 to-indigo-900/20 border-purple-500/30 text-purple-300 shadow-purple-500/10"><i class="fa-solid fa-shield-halved"></i></div>
+              <h3 class="text-xl font-bold text-white mb-3">Maintenance &amp; suivi</h3>
+              <p class="text-slate-400 text-sm leading-relaxed mb-6">Mises à jour, sauvegardes, sécurité et petites évolutions : vous restez serein après la mise en ligne.</p>
             </div>
-            <h3>Maintenance & suivi</h3>
-            <p>Mises à jour, sauvegardes, sécurité et petites évolutions : vous restez serein après la mise en ligne.</p>
-            <ul><li>Mises à jour régulières</li><li>Sauvegardes</li><li>Support réactif</li></ul>
-          </article>
+            <div class="flex flex-wrap gap-2 pt-4 border-t border-white/10"><span class="tag">Mises à jour</span><span class="tag">Sauvegardes</span><span class="tag">Support réactif</span></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- ===== Méthode ===== -->
-    <section class="section section--alt" id="methode">
-      <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow">Notre méthode</p>
-          <h2>Un projet clair, de A à Z</h2>
-          <p>Quatre étapes simples, avec vous à chaque moment clé.</p>
-        </div>
-        <ol class="steps">
-          <li class="step reveal">
-            <span class="step__num">01</span>
-            <h3>Échange</h3>
-            <p>On discute de votre activité, de vos objectifs et de vos envies. Vous recevez un devis détaillé.</p>
-          </li>
-          <li class="step reveal">
-            <span class="step__num">02</span>
-            <h3>Design</h3>
-            <p>Nous créons les maquettes de votre site ou application et les ajustons avec vous.</p>
-          </li>
-          <li class="step reveal">
-            <span class="step__num">03</span>
-            <h3>Développement</h3>
-            <p>Nous donnons vie aux maquettes avec un code propre, rapide et sécurisé.</p>
-          </li>
-          <li class="step reveal">
-            <span class="step__num">04</span>
-            <h3>Lancement</h3>
-            <p>Mise en ligne, prise en main, puis accompagnement pour faire évoluer votre projet.</p>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <!-- ===== Réalisations ===== -->
-    <section class="section" id="realisations">
-      <div class="container">
-        <div class="section__head reveal">
-          <p class="eyebrow">Réalisations</p>
-          <h2>Des projets déjà en ligne</h2>
-          <p>Nos derniers projets en ligne, à découvrir en un clic.</p>
+    <!-- 4. RÉALISATIONS : bande Glide Belt (validée) -->
+    <section id="portfolio" class="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-12 reveal">
+          <span class="eyebrow-pill text-purple-400 bg-purple-500/10 border-purple-500/20">Réalisations</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4">Des projets <span class="text-gradient">déjà en ligne</span></h2>
+          <p class="text-slate-400 mt-4 text-base sm:text-lg">Nos derniers projets en ligne, à découvrir en un clic.</p>
         </div>
         <div class="belt reveal" data-images="assets/projet-sketch.webp, assets/projet-tournoi.webp" data-links="https://sketch-twist.com/, https://tournoipro.fr/">
           <canvas aria-hidden="true"></canvas>
@@ -178,129 +257,229 @@
       </div>
     </section>
 
-    <!-- ===== À propos ===== -->
-    <section class="section section--alt" id="apropos">
-      <div class="container about">
-        <div class="about__visual reveal">
-          <div class="about__logo">
-            <img src="assets/logo-elm-design-bordeaux.webp" alt="Logo ELM Design" width="1000" height="809" loading="lazy">
-          </div>
+    <!-- 5. MÉTHODE -->
+    <section id="processus" class="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-20 reveal">
+          <span class="eyebrow-pill text-cyan-400 bg-cyan-500/10 border-cyan-500/20">Notre méthode</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4">Un projet clair, <span class="text-gradient">de A à Z</span></h2>
+          <p class="text-slate-400 mt-4 text-base sm:text-lg">Quatre étapes simples, avec vous à chaque moment clé.</p>
         </div>
-        <div class="about__text reveal">
-          <p class="eyebrow">À propos</p>
-          <h2>Un interlocuteur unique, attentif à chaque détail</h2>
-          <p>
-            ELM Design est une jeune entreprise spécialisée dans la création de sites web et
-            d'applications mobiles. Notre conviction : un bon outil digital doit être à la fois
-            beau, simple à utiliser et utile à votre activité.
-          </p>
-          <p>
-            En travaillant directement avec le créateur de votre projet, vous bénéficiez d'un
-            échange fluide, de délais maîtrisés et d'un accompagnement personnalisé, avant comme
-            après la mise en ligne.
-          </p>
-          <div class="values">
-            <div><strong>Élégance</strong><span>Un design soigné qui vous ressemble</span></div>
-            <div><strong>Performance</strong><span>Des sites rapides et bien référencés</span></div>
-            <div><strong>Proximité</strong><span>Un contact direct et réactif</span></div>
+        <div class="relative" id="process-container">
+          <div class="hidden lg:block absolute top-10 left-[10%] right-[10%] h-[2px] bg-white/10">
+            <div id="process-line-bar" class="h-full w-0 bg-gradient-to-r from-purple-500 via-cyan-400 to-emerald-400 process-line-progress"></div>
+          </div>
+          <ol class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+            <li class="reveal flex flex-col items-center text-center group">
+              <div class="step-num border-purple-500/40 shadow-purple-500/15 group-hover:border-cyan-400">01</div>
+              <h3 class="text-xl font-bold text-white mt-6 mb-2">Échange</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">On discute de votre activité, de vos objectifs et de vos envies. Vous recevez un devis détaillé.</p>
+            </li>
+            <li class="reveal flex flex-col items-center text-center group" style="transition-delay:150ms">
+              <div class="step-num border-purple-500/40 shadow-purple-500/15 group-hover:border-cyan-400">02</div>
+              <h3 class="text-xl font-bold text-white mt-6 mb-2">Design</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">Nous créons les maquettes de votre site ou application et les ajustons avec vous.</p>
+            </li>
+            <li class="reveal flex flex-col items-center text-center group" style="transition-delay:300ms">
+              <div class="step-num border-cyan-500/40 shadow-cyan-500/15 group-hover:border-purple-400">03</div>
+              <h3 class="text-xl font-bold text-white mt-6 mb-2">Développement</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">Nous donnons vie aux maquettes avec un code propre, rapide et sécurisé.</p>
+            </li>
+            <li class="reveal flex flex-col items-center text-center group" style="transition-delay:450ms">
+              <div class="step-num border-emerald-500/40 shadow-emerald-500/15 group-hover:border-cyan-400">04</div>
+              <h3 class="text-xl font-bold text-white mt-6 mb-2">Lancement</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">Mise en ligne, prise en main, puis accompagnement pour faire évoluer votre projet.</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. SIMULATEUR (sans prix) -->
+    <section id="simulateur" class="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-14 reveal">
+          <span class="eyebrow-pill text-purple-400 bg-purple-500/10 border-purple-500/20">Votre projet en 3 clics</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-4">Décrivez <span class="text-gradient">votre projet</span></h2>
+          <p class="text-slate-400 mt-4 text-base sm:text-lg">Choisissez ce dont vous avez besoin : votre demande de devis se remplit toute seule.</p>
+        </div>
+
+        <div class="glass rounded-3xl p-6 sm:p-10 border border-white/15 shadow-2xl reveal">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div class="lg:col-span-7 space-y-8">
+              <div>
+                <p class="block text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">1. Quel type de projet ?</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="sim-project-types" role="radiogroup" aria-label="Type de projet">
+                  <button type="button" role="radio" aria-checked="true" data-type="Site vitrine" class="sim-type-btn is-active"><i class="fa-solid fa-laptop-code text-cyan-400"></i><span>Site vitrine</span></button>
+                  <button type="button" role="radio" aria-checked="false" data-type="E-commerce" class="sim-type-btn"><i class="fa-solid fa-bag-shopping text-purple-400"></i><span>E-commerce</span></button>
+                  <button type="button" role="radio" aria-checked="false" data-type="Application mobile" class="sim-type-btn"><i class="fa-solid fa-mobile-screen text-pink-400"></i><span>Application mobile</span></button>
+                  <button type="button" role="radio" aria-checked="false" data-type="Refonte de site" class="sim-type-btn"><i class="fa-solid fa-wand-magic-sparkles text-emerald-400"></i><span>Refonte de site</span></button>
+                </div>
+              </div>
+
+              <div>
+                <p class="block text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">2. Les fonctionnalités utiles</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="sim-features">
+                  <label class="sim-feature"><input type="checkbox" data-name="Design sur mesure" checked><span>Design sur mesure</span></label>
+                  <label class="sim-feature"><input type="checkbox" data-name="Espace membre / connexion"><span>Espace membre / connexion</span></label>
+                  <label class="sim-feature"><input type="checkbox" data-name="Paiement en ligne"><span>Paiement en ligne</span></label>
+                  <label class="sim-feature"><input type="checkbox" data-name="Référencement (SEO)"><span>Référencement (SEO)</span></label>
+                  <label class="sim-feature"><input type="checkbox" data-name="Site multilingue"><span>Site multilingue</span></label>
+                  <label class="sim-feature"><input type="checkbox" data-name="Maintenance & suivi"><span>Maintenance &amp; suivi</span></label>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between mb-3 gap-4">
+                  <label for="sim-timeline" class="text-sm font-bold uppercase tracking-wider text-slate-300">3. Pour quand ?</label>
+                  <span id="sim-timeline-label" class="text-sm font-mono font-bold text-cyan-400">Dans les prochains mois</span>
+                </div>
+                <input type="range" id="sim-timeline" min="1" max="3" value="2" step="1" class="w-full">
+                <div class="flex justify-between text-xs text-slate-500 mt-2 font-mono">
+                  <span>Rapidement</span><span>Prochains mois</span><span>Pas pressé</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="lg:col-span-5 flex flex-col justify-between bg-[#080A12]/90 rounded-2xl p-6 sm:p-8 border border-white/10 relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-40 h-40 bg-purple-600/20 blur-3xl pointer-events-none"></div>
+              <div>
+                <div class="flex items-center justify-between pb-4 border-b border-white/10">
+                  <span class="text-xs font-mono uppercase tracking-wider text-slate-400">Récapitulatif</span>
+                  <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Devis gratuit</span>
+                </div>
+                <div class="my-6">
+                  <div class="text-sm text-slate-400 mb-1">Votre projet</div>
+                  <div id="recap-type-big" class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Site vitrine</div>
+                  <p class="text-xs text-slate-500 mt-2">Chaque projet est unique : vous recevez un devis personnalisé, sans engagement.</p>
+                </div>
+                <div class="space-y-2.5 text-sm border-t border-white/10 pt-4">
+                  <div class="flex justify-between gap-4"><span class="text-slate-400">Fonctionnalités :</span><span id="recap-count" class="font-semibold text-cyan-400 text-right">1 option</span></div>
+                  <div class="flex justify-between gap-4"><span class="text-slate-400">Délai :</span><span id="recap-speed" class="font-semibold text-purple-300 text-right">Prochains mois</span></div>
+                </div>
+              </div>
+              <div class="mt-8">
+                <button type="button" id="apply-estimate-btn" class="btn-shimmer w-full py-4 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 shadow-lg shadow-purple-500/25 transition-all flex items-center justify-center gap-2 group">
+                  <span>Préparer ma demande de devis</span>
+                  <i class="fa-solid fa-paper-plane text-sm group-hover:translate-x-1 transition-transform"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ===== Contact ===== -->
-    <section class="section contact" id="contact">
-      <div class="container contact__inner">
-        <div class="contact__text reveal">
-          <p class="eyebrow">Contact</p>
-          <h2>Parlons de votre projet</h2>
-          <p>Décrivez-nous votre idée en quelques lignes : nous revenons vers vous rapidement avec des pistes et un devis gratuit.</p>
-          <ul class="contact__list">
-            <li>
-              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
-              <a href="mailto:elmdesign74@gmail.com">elmdesign74@gmail.com</a>
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
-              <a href="tel:+33787197311">07 87 19 73 11</a>
-            </li>
-          </ul>
+    <!-- 7. À PROPOS (validé : logo bordeaux seul) -->
+    <section id="apropos" class="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        <div class="lg:col-span-5 reveal flex justify-center">
+          <img src="assets/logo-elm-design-bordeaux.webp" alt="Logo ELM Design" width="1000" height="809" loading="lazy" class="about-logo w-full max-w-[440px] h-auto">
         </div>
-        <form class="form reveal" id="contactForm" novalidate>
-          <div class="form__row">
-            <label>Nom<input type="text" name="nom" required autocomplete="name" autocapitalize="words" enterkeyhint="next"></label>
-            <label>E-mail<input type="email" name="email" required autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next"></label>
+        <div class="lg:col-span-7 space-y-6 reveal">
+          <span class="eyebrow-pill text-cyan-400 bg-cyan-500/10 border-cyan-500/20">À propos</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white">Un interlocuteur unique, <span class="text-gradient">attentif à chaque détail</span></h2>
+          <p class="text-slate-400 leading-relaxed">ELM Design est une jeune entreprise spécialisée dans la création de sites web et d'applications mobiles. Notre conviction : un bon outil digital doit être à la fois beau, simple à utiliser et utile à votre activité.</p>
+          <p class="text-slate-400 leading-relaxed">En travaillant directement avec le créateur de votre projet, vous bénéficiez d'un échange fluide, de délais maîtrisés et d'un accompagnement personnalisé, avant comme après la mise en ligne.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div class="glass rounded-2xl p-5"><div class="font-bold text-white">Élégance</div><div class="text-sm text-slate-400 mt-1">Un design soigné qui vous ressemble</div></div>
+            <div class="glass rounded-2xl p-5"><div class="font-bold text-white">Performance</div><div class="text-sm text-slate-400 mt-1">Des sites rapides et bien référencés</div></div>
+            <div class="glass rounded-2xl p-5"><div class="font-bold text-white">Proximité</div><div class="text-sm text-slate-400 mt-1">Un contact direct et réactif</div></div>
           </div>
-          <label>Type de projet
-            <select name="type">
-              <option>Site vitrine</option>
-              <option>E-commerce</option>
-              <option>Application mobile</option>
-              <option>Refonte de site</option>
-              <option>Autre</option>
-            </select>
-          </label>
-          <label>Votre message<textarea name="message" rows="5" required></textarea></label>
-          <button type="submit" class="btn btn--gold btn--full">Envoyer ma demande</button>
-          <p class="form__status" id="formStatus" role="status"></p>
-        </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. CONTACT + PIED DE PAGE -->
+    <section id="contact" class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 relative">
+      <div class="max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-20 border-b border-white/10">
+          <div class="lg:col-span-5 space-y-6 reveal">
+            <span class="eyebrow-pill text-cyan-400 bg-cyan-500/10 border-cyan-500/20">Contact</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Parlons de <span class="text-gradient">votre projet</span></h2>
+            <p class="text-slate-400 leading-relaxed">Décrivez-nous votre idée en quelques lignes : nous revenons vers vous rapidement avec des pistes et un devis gratuit.</p>
+            <div class="space-y-4 pt-4">
+              <a href="mailto:elmdesign74@gmail.com" class="flex items-center gap-4 glass p-4 rounded-2xl hover:border-cyan-400/40 transition-colors">
+                <div class="w-11 h-11 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400"><i class="fa-solid fa-envelope"></i></div>
+                <div><div class="text-xs text-slate-400">E-mail</div><div class="font-semibold text-white break-all">elmdesign74@gmail.com</div></div>
+              </a>
+              <a href="tel:+33787197311" class="flex items-center gap-4 glass p-4 rounded-2xl hover:border-cyan-400/40 transition-colors">
+                <div class="w-11 h-11 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400"><i class="fa-solid fa-phone"></i></div>
+                <div><div class="text-xs text-slate-400">Téléphone</div><div class="font-semibold text-white">07 87 19 73 11</div></div>
+              </a>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 reveal">
+            <form id="contact-form" class="glass rounded-3xl p-6 sm:p-10 border border-white/15 space-y-6" novalidate>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label for="name" class="field-label">Nom *</label>
+                  <input type="text" id="name" name="nom" required autocomplete="name" autocapitalize="words" enterkeyhint="next" placeholder="Votre nom" class="field">
+                </div>
+                <div>
+                  <label for="email" class="field-label">E-mail *</label>
+                  <input type="email" id="email" name="email" required autocomplete="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="next" placeholder="vous@exemple.fr" class="field">
+                </div>
+              </div>
+              <div>
+                <label for="type" class="field-label">Type de projet</label>
+                <select id="type" name="type" class="field">
+                  <option>Site vitrine</option>
+                  <option>E-commerce</option>
+                  <option>Application mobile</option>
+                  <option>Refonte de site</option>
+                  <option>Autre</option>
+                </select>
+              </div>
+              <div>
+                <label for="message" class="field-label">Votre message *</label>
+                <textarea id="message" name="message" rows="5" required placeholder="Décrivez vos objectifs, votre activité et ce dont vous avez besoin…" class="field"></textarea>
+              </div>
+              <button type="submit" class="btn-shimmer w-full py-4 px-8 rounded-xl font-bold text-white bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:brightness-110 shadow-xl shadow-purple-600/25 transition-all flex items-center justify-center gap-3">
+                <span>Envoyer ma demande</span>
+                <i class="fa-solid fa-rocket"></i>
+              </button>
+              <p id="formStatus" class="text-sm min-h-[1.25rem]" role="status"></p>
+            </form>
+          </div>
+        </div>
+
+        <footer class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 text-center sm:text-left">
+          <div class="flex flex-col sm:flex-row items-center gap-2">
+            <span class="font-bold text-white">ELM<span class="text-cyan-400"> Design</span></span>
+            <span>— © <span id="year"></span> Tous droits réservés · <a href="#" class="hover:text-white">Mentions légales</a></span>
+          </div>
+          <div>Site conçu et développé par <a href="https://elmdesign.fr" class="text-slate-300 hover:text-white">ELM Design</a></div>
+        </footer>
       </div>
     </section>
   </main>
 
-  <!-- ===== Footer ===== -->
-  <footer class="footer">
-    <div class="container footer__inner">
-      <a href="#accueil" class="footer__logo" aria-label="ELM Design — retour en haut">
-        <img src="assets/logo-elm-design-or-compact.webp" alt="ELM Design" width="480" height="339" loading="lazy">
-      </a>
-      <p>Création sites web & applications mobiles</p>
-      <p class="footer__credit">Site conçu et développé par
-        <a href="https://elmdesign.fr" class="footer__credit-logo">
-          <span>ELM Design</span>
-        </a>
-      </p>
-      <p class="footer__copy">© <span id="year"></span> ELM Design — Tous droits réservés · <a href="#">Mentions légales</a></p>
+  <!-- Notification -->
+  <div id="toast-notification" class="fixed bottom-6 right-6 left-6 sm:left-auto z-50 translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" role="status" aria-live="polite">
+    <div class="glass-strong border border-emerald-500/40 rounded-2xl p-4 shadow-2xl shadow-emerald-950/50 flex items-center gap-4 sm:max-w-sm">
+      <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0"><i class="fa-solid fa-circle-check text-xl"></i></div>
+      <div>
+        <h4 id="toast-title" class="font-bold text-white text-sm">Message envoyé !</h4>
+        <p id="toast-message" class="text-xs text-slate-300 mt-0.5">Nous vous répondons rapidement.</p>
+      </div>
     </div>
-  </footer>
+  </div>
 
-  <script src="js/main.js"></script>
+  <script src="js/site.js"></script>
   <script type="module" src="js/glide-belt.js"></script>
 
-  <!-- Défilement fluide (Lenis) -->
-  <script type="importmap">{ "imports": {
-    "lenis": "https://unpkg.com/lenis@1.3.19/dist/lenis.mjs"
-  } }</script>
+  <!-- Défilement fluide (Lenis, validé) -->
+  <script type="importmap">{ "imports": { "lenis": "https://unpkg.com/lenis@1.3.19/dist/lenis.mjs" } }</script>
   <script type="module">
     import Lenis from "lenis";
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const lenis = new Lenis({ duration: 1.15, smoothWheel: true, touchMultiplier: 1.5, anchors: { offset: -70 } });
+      const lenis = new Lenis({ duration: 1.15, smoothWheel: true, touchMultiplier: 1.5, anchors: { offset: -90 } });
       window.lenis = lenis;
       function raf(t) { lenis.raf(t); requestAnimationFrame(raf); }
       requestAnimationFrame(raf);
     }
   </script>
-  <script>
-  /* Vidéo de fond : s'assombrit en défilant, l'accueil remonte et s'efface en douceur */
-  (() => {
-    const bg = document.getElementById('bgVideo');
-    const video = bg.querySelector('video');
-    const heroCol = document.querySelector('.hero__col');
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { video.removeAttribute('autoplay'); video.pause(); }
-    // Pause quand l'onglet est caché (économise batterie et données)
-    document.addEventListener('visibilitychange', () => { if (document.hidden) video.pause(); else if (!reduce) video.play().catch(() => {}); });
-    const update = () => {
-      const y = window.scrollY;
-      bg.style.setProperty('--dim', Math.min(1, y / innerHeight) * 0.72);
-      if (heroCol && !reduce) {
-        heroCol.style.transform = `translateY(calc(-9vh + ${y * 0.4}px))`;
-        heroCol.style.opacity = Math.max(0, 1 - y / 600);
-      }
-    };
-    addEventListener('scroll', update, { passive: true });
-    update();
-  })();
-</script>
 </body>
 </html>

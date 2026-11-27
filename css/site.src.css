@@ -1,0 +1,150 @@
+/* Source de css/site.css (voir tailwind.config.js pour la commande de build) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Base ---------- */
+:root {
+  --bg-primary: #05050A;
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(13, 15, 25, 0.6);
+  --ease: cubic-bezier(.23, 1, .32, 1);
+}
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg-primary);
+}
+body { background: transparent; color: #F8FAFC; overflow-x: clip; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #05050A; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #8B5CF6, #06B6D4); border-radius: 4px; }
+a, button, [role="button"], label { touch-action: manipulation; }
+button, [role="button"], [role="radio"] { -webkit-user-select: none; user-select: none; }
+section[id] { scroll-margin-top: 96px; }
+:focus-visible { outline: 2px solid #22D3EE; outline-offset: 3px; border-radius: 8px; }
+
+/* ---------- Vidéo de fond (validée) sous un voile sombre ---------- */
+.bg-video { position: fixed; inset: 0; z-index: -1; overflow: hidden; background: var(--bg-primary); }
+.bg-video video { width: 100%; height: 100%; object-fit: cover; opacity: .55; filter: saturate(.85); }
+.bg-video__veil {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(120% 80% at 70% 10%, rgba(76, 29, 149, .35), transparent 60%),
+    linear-gradient(180deg, rgba(5, 5, 10, .72) 0%, rgba(5, 5, 10, .82) 45%, rgba(5, 5, 10, .9) 100%);
+}
+
+/* ---------- Effets du template ---------- */
+@layer components {
+  .glass {
+    background: var(--glass-bg);
+    -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+  }
+  .glass-strong {
+    background: rgba(10, 12, 20, 0.92);
+    -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .text-gradient {
+    background: linear-gradient(135deg, #A78BFA 0%, #38BDF8 50%, #22D3EE 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .nav-link { @apply relative py-1 transition-colors; }
+  .nav-link::after {
+    content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 0;
+    background: linear-gradient(90deg, #A855F7, #22D3EE); transition: width .3s var(--ease);
+  }
+  .eyebrow-pill { @apply inline-block text-xs font-mono uppercase tracking-widest px-3 py-1.5 rounded-full border; }
+  .svc-icon { @apply w-14 h-14 rounded-2xl bg-gradient-to-br border flex items-center justify-center text-2xl mb-6 shadow-lg; }
+  .tag { @apply text-xs font-mono px-2.5 py-1 rounded-md bg-white/5 text-slate-300; }
+  .step-num { @apply w-20 h-20 rounded-2xl glass border flex items-center justify-center text-2xl font-extrabold font-mono text-white shadow-xl transition-all duration-300 bg-[#080A12]; }
+  .field-label { @apply block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2; }
+  .field {
+    @apply w-full px-4 py-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 transition-colors;
+    font-size: 16px; /* évite le zoom iOS */
+  }
+  .field:focus { outline: none; border-color: #22D3EE; }
+  select.field option { background: #0b0d16; color: #fff; }
+
+  /* Simulateur */
+  .sim-type-btn { @apply p-4 rounded-2xl border border-white/10 bg-white/[0.03] text-left transition-all flex flex-col gap-2 font-bold text-white text-sm; }
+  .sim-type-btn i { @apply text-xl; }
+  .sim-type-btn.is-active { @apply border-cyan-400 bg-cyan-500/15; }
+  .sim-feature { @apply flex items-center gap-3 p-3.5 rounded-xl border border-white/10 bg-white/[0.02] cursor-pointer transition-all text-sm font-medium text-slate-200; }
+  .sim-feature input { @apply w-4 h-4 accent-cyan-400 rounded shrink-0; }
+  .sim-feature:has(input:checked) { @apply border-cyan-400/50 bg-cyan-500/[0.08]; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-link:hover { color: #fff; }
+  .nav-link:hover::after { width: 100%; }
+  .sim-type-btn:not(.is-active):hover, .sim-feature:hover { background: rgba(255, 255, 255, .07); }
+}
+
+/* Bordure lumineuse qui suit la souris */
+.glow-card { position: relative; transition: transform .15s ease-out, box-shadow .3s ease; transform-style: preserve-3d; }
+.glow-card::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px;
+  background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(139, 92, 246, .6), rgba(6, 182, 212, .4), transparent 40%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .4s ease; pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) { .glow-card:hover::before { opacity: 1; } }
+
+/* Curseur de la machine à écrire */
+.typewriter-cursor {
+  display: inline-block; width: 3px; height: 1em; margin-left: 4px; vertical-align: -0.08em;
+  background-color: #06B6D4; animation: blink .8s infinite;
+}
+@keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+/* Apparition au défilement */
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity .8s cubic-bezier(.16, 1, .3, 1), transform .8s cubic-bezier(.16, 1, .3, 1); }
+.reveal.active { opacity: 1; transform: none; }
+
+.ambient-orb { position: absolute; border-radius: 50%; filter: blur(110px); z-index: 0; pointer-events: none; opacity: .35; }
+.process-line-progress { transition: width 1.2s cubic-bezier(.22, 1, .36, 1); }
+
+/* Curseur de délai */
+input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; height: 22px; }
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%; margin-top: -8px; cursor: pointer;
+  background: linear-gradient(135deg, #8B5CF6, #06B6D4); box-shadow: 0 0 15px rgba(6, 182, 212, .8); border: 2px solid #fff;
+}
+input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: rgba(255, 255, 255, .15); border-radius: 999px; }
+input[type=range]::-moz-range-thumb { height: 18px; width: 18px; border-radius: 50%; background: linear-gradient(135deg, #8B5CF6, #06B6D4); border: 2px solid #fff; box-shadow: 0 0 15px rgba(6, 182, 212, .8); }
+input[type=range]::-moz-range-track { height: 6px; background: rgba(255, 255, 255, .15); border-radius: 999px; }
+
+/* ---------- Boutons « shimmer » (validés) ---------- */
+.btn-shimmer { position: relative; overflow: hidden; isolation: isolate; }
+.btn-shimmer::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(110deg, transparent 25%, rgba(255, 255, 255, .35) 50%, transparent 75%);
+  transform: translateX(-100%); animation: btn-sweep 2.6s ease-in-out infinite;
+}
+.btn-shimmer > * { position: relative; z-index: 1; }
+.btn-shimmer--soft::after { background: linear-gradient(110deg, transparent 25%, rgba(34, 211, 238, .16) 50%, transparent 75%); animation-delay: .45s; }
+@keyframes btn-sweep { 0% { transform: translateX(-100%); } 55%, 100% { transform: translateX(100%); } }
+.btn-shimmer:active { transform: scale(.97); }
+
+/* ---------- Réalisations : Glide Belt (validée) ---------- */
+.belt { position: relative; width: 100%; max-width: 980px; aspect-ratio: 16 / 9; margin: 0 auto; }
+.belt canvas {
+  display: block; width: 100%; height: 100%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.belt:focus-within { outline: 2px solid #22D3EE; outline-offset: 6px; border-radius: 14px; }
+
+/* À propos : logo seul (validé) */
+.about-logo { filter: drop-shadow(0 0 40px rgba(190, 40, 80, .25)); }
+
+/* Mouvement réduit */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  .reveal { opacity: 1; transform: none; }
+  .btn-shimmer::after { display: none; }
+}
