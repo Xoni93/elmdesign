@@ -537,13 +537,27 @@ const lz = {
    Changements : pas de fond sombre peint derrière les cartes (on garde le fond
    clair du site), pause hors écran, et interaction :
    - survol d'une carte : le défilement s'arrête et la carte zoome légèrement ;
-   - clic : ouverture du projet dans un nouvel onglet. */
+   - clic : ouverture du projet dans un nouvel onglet ;
+   - contour bleu du site autour de chaque carte. */
 const TEMPLATE = lz;
 const DPR_CAP = 2;
 const LOOP_SECONDS = 20.0;
 const PARAMS = {"cornerRadius":3,"padding":6,"shadowEnabled":false,"direction":"horizontal","sideScale":1,"gap":15,"cardAspect":"auto","backgroundType":"color","background":"rgba(0,0,0,0)"};
 const ZOOM = 0.07;        // +7 % au survol
 const ZOOM_MS = 220;      // durée du zoom
+const BORDER = "#2f5bff"; // contour bleu du site
+const BORDER_PX = 2;      // épaisseur en px CSS
+
+function strokeCard(ctx, rect, radius, alpha, lw) {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.globalAlpha = alpha;
+  Xa(ctx, rect.x + lw / 2, rect.y + lw / 2, rect.w - lw, rect.h - lw, Math.max(0, radius - lw / 2));
+  ctx.lineWidth = lw;
+  ctx.strokeStyle = BORDER;
+  ctx.stroke();
+  ctx.restore();
+}
 
 /* Même géométrie que render() : rectangle, échelle et opacité de chaque carte,
    de la plus proche du centre à la plus éloignée. */
@@ -609,13 +623,22 @@ function mount(container, canvas, images, links) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     TEMPLATE.render({ ctx, t, width: canvas.width, height: canvas.height, params: PARAMS, images: imgs, background: null });
+    const lw = BORDER_PX * Math.min(window.devicePixelRatio || 1, DPR_CAP);
+    const cards = cardRects(t, canvas.width, canvas.height, PARAMS, images);
+    // contour bleu de chaque carte, à la même opacité que la carte
+    for (let n = cards.length - 1; n >= 0; n--) {
+      const c = cards[n];
+      if (c.slot === zoomSlot && zk > 0) continue;
+      strokeCard(ctx, c.rect, c.radius, c.alpha, lw);
+    }
     if (zoomSlot >= 0 && zk > 0) {
-      const c = cardRects(t, canvas.width, canvas.height, PARAMS, images).find((o) => o.slot === zoomSlot);
+      const c = cards.find((o) => o.slot === zoomSlot);
       if (c) {
         const k = easeOut(zk), s = 1 + ZOOM * k, R = c.rect;
         const rect = { x: R.x + R.w / 2 - (R.w * s) / 2, y: R.y + R.h / 2 - (R.h * s) / 2, w: R.w * s, h: R.h * s };
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         Re(ctx, images[zoomSlot], zoomSlot, rect, c.radius * s, { alpha: c.alpha + (1 - c.alpha) * k });
+        strokeCard(ctx, rect, c.radius * s, c.alpha + (1 - c.alpha) * k, lw);
       }
     }
   };
