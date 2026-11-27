@@ -114,8 +114,8 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -.035em; color: var(--text); }
 /* À propos */
 .values strong { color: var(--text); }
 .values span { color: var(--muted); }
-.about__logo { background: radial-gradient(120% 90% at 50% 20%, #16244a 0%, #0b1220 70%); border-radius: 28px; padding: clamp(28px, 5vw, 56px); box-shadow: var(--shadow-lg); }
-.about__logo img { filter: drop-shadow(0 10px 30px rgba(233, 196, 106, .22)); }  /* le logo doré garde un fond sombre pour rester lisible */
+.about__logo { background: none; border-radius: 0; padding: 0; box-shadow: none; }  /* logo seul, sans encadré */
+.about__logo img { filter: drop-shadow(0 10px 24px rgba(15, 23, 42, .18)); }
 
 /* Contact et formulaire */
 .contact__list li, .contact__list a { color: var(--text); }
