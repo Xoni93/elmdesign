@@ -538,29 +538,60 @@ const lz = {
    clair du site), pause hors écran, et interaction :
    - survol d'une carte : le défilement s'arrête et la carte zoome légèrement ;
    - clic : ouverture du projet dans un nouvel onglet ;
-   - contour bleu du site autour de chaque carte. */
+   - contour 3D bleu (tranche, liseré biseauté, reflet) autour de chaque carte. */
 const TEMPLATE = lz;
 const DPR_CAP = 2;
 const LOOP_SECONDS = 20.0;
 const PARAMS = {"cornerRadius":3,"padding":6,"shadowEnabled":false,"direction":"horizontal","sideScale":1,"gap":15,"cardAspect":"auto","backgroundType":"color","background":"rgba(0,0,0,0)"};
 const ZOOM = 0.07;        // +7 % au survol
 const ZOOM_MS = 220;      // durée du zoom
-const BORDER = "#2f5bff"; // contour bleu du site
-const BORDER_PX = 2;      // épaisseur en px CSS
+/* Contour 3D dans le bleu du site (#2f5bff) :
+   - une tranche bleu foncé sous la carte (épaisseur) avec une ombre bleutée, dessinée DERRIÈRE ;
+   - un liseré biseauté : dégradé clair en haut → bleu soutenu en bas ;
+   - un fin reflet blanc sur l'arête supérieure intérieure. */
+const DEPTH_PX = 6;   // épaisseur de la tranche (px CSS)
+const RIM_PX = 3;     // largeur du liseré (px CSS)
 
-function strokeCard(ctx, rect, radius, alpha, lw) {
+function edge3D(ctx, rect, radius, alpha, px) {
+  const D = DEPTH_PX * px, lw = RIM_PX * px, r = Math.max(0, radius);
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  // 1. Tranche + ombre, derrière ce qui est déjà dessiné
+  ctx.globalCompositeOperation = "destination-over";
+  ctx.globalAlpha = alpha;
+  ctx.shadowColor = "rgba(47, 91, 255, 0.35)";
+  ctx.shadowBlur = 18 * px;
+  ctx.shadowOffsetY = 10 * px;
+  const slab = ctx.createLinearGradient(0, rect.y, 0, rect.y + rect.h + D);
+  slab.addColorStop(0, "#2f5bff");
+  slab.addColorStop(1, "#1532a8");
+  Xa(ctx, rect.x, rect.y + D, rect.w, rect.h, r);
+  ctx.fillStyle = slab;
+  ctx.fill();
+  ctx.restore();
+  // 2. Liseré biseauté
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.globalAlpha = alpha;
-  Xa(ctx, rect.x + lw / 2, rect.y + lw / 2, rect.w - lw, rect.h - lw, Math.max(0, radius - lw / 2));
+  const rim = ctx.createLinearGradient(rect.x, rect.y, rect.x + rect.w * 0.35, rect.y + rect.h);
+  rim.addColorStop(0, "#a9bcff");
+  rim.addColorStop(0.45, "#2f5bff");
+  rim.addColorStop(1, "#1a3bd1");
+  Xa(ctx, rect.x + lw / 2, rect.y + lw / 2, rect.w - lw, rect.h - lw, Math.max(0, r - lw / 2));
   ctx.lineWidth = lw;
-  ctx.strokeStyle = BORDER;
+  ctx.strokeStyle = rim;
+  ctx.stroke();
+  // 3. Reflet sur l'arête intérieure
+  const shine = ctx.createLinearGradient(0, rect.y, 0, rect.y + rect.h * 0.5);
+  shine.addColorStop(0, "rgba(255, 255, 255, 0.6)");
+  shine.addColorStop(1, "rgba(255, 255, 255, 0)");
+  Xa(ctx, rect.x + lw + px / 2, rect.y + lw + px / 2, rect.w - 2 * lw - px, rect.h - 2 * lw - px, Math.max(0, r - lw));
+  ctx.lineWidth = px;
+  ctx.strokeStyle = shine;
   ctx.stroke();
   ctx.restore();
 }
 
-/* Même géométrie que render() : rectangle, échelle et opacité de chaque carte,
-   de la plus proche du centre à la plus éloignée. */
 function cardRects(t, a, r, params, images) {
   const u = k5(a, r),
     content = G6(a, r, H(params, "padding", 6)),
@@ -623,13 +654,13 @@ function mount(container, canvas, images, links) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     TEMPLATE.render({ ctx, t, width: canvas.width, height: canvas.height, params: PARAMS, images: imgs, background: null });
-    const lw = BORDER_PX * Math.min(window.devicePixelRatio || 1, DPR_CAP);
+    const px = Math.min(window.devicePixelRatio || 1, DPR_CAP);
     const cards = cardRects(t, canvas.width, canvas.height, PARAMS, images);
-    // contour bleu de chaque carte, à la même opacité que la carte
+    // contour 3D de chaque carte, à la même opacité que la carte
     for (let n = cards.length - 1; n >= 0; n--) {
       const c = cards[n];
       if (c.slot === zoomSlot && zk > 0) continue;
-      strokeCard(ctx, c.rect, c.radius, c.alpha, lw);
+      edge3D(ctx, c.rect, c.radius, c.alpha, px);
     }
     if (zoomSlot >= 0 && zk > 0) {
       const c = cards.find((o) => o.slot === zoomSlot);
@@ -638,7 +669,7 @@ function mount(container, canvas, images, links) {
         const rect = { x: R.x + R.w / 2 - (R.w * s) / 2, y: R.y + R.h / 2 - (R.h * s) / 2, w: R.w * s, h: R.h * s };
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         Re(ctx, images[zoomSlot], zoomSlot, rect, c.radius * s, { alpha: c.alpha + (1 - c.alpha) * k });
-        strokeCard(ctx, rect, c.radius * s, c.alpha + (1 - c.alpha) * k, lw);
+        edge3D(ctx, rect, c.radius * s, c.alpha + (1 - c.alpha) * k, px);
       }
     }
   };
