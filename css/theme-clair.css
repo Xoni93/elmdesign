@@ -115,7 +115,7 @@ h1, h2, h3 { font-weight: 700; letter-spacing: -.035em; color: var(--text); }
 .values strong { color: var(--text); }
 .values span { color: var(--muted); }
 .about__logo { background: none; border-radius: 0; padding: 0; box-shadow: none; }  /* logo seul, sans encadré */
-.about__logo img { filter: drop-shadow(0 10px 24px rgba(15, 23, 42, .18)); }
+.about__logo img { filter: drop-shadow(0 10px 24px rgba(128, 0, 32, .16)); }
 
 /* Contact et formulaire */
 .contact__list li, .contact__list a { color: var(--text); }
