@@ -112,7 +112,7 @@
   if (tw && !reduceMotion) {
     const WORDS = ['briller', 'grandir', 'rayonner', 'décoller'];
     // Le mot s'écrit juste après « Des sites qui font » (titre animé lettre par lettre)
-    const TYPE_MS = 85, DELETE_MS = 45, HOLD_MS = 2200, START_MS = 1900;
+    const TYPE_MS = 45, DELETE_MS = 30, HOLD_MS = 2200, START_MS = 950; // même rythme que les titres (45 ms par lettre)
     let w = 0, c = 0, deleting = false;
     tw.textContent = '';
     const tick = () => {

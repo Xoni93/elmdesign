@@ -17,8 +17,8 @@ import TextEngine from "spring-text-engine";
 /* Réglages du prompt — à ne pas modifier */
 const LETTER_OUT = { opacity: 0 };
 const LETTER_IN = { opacity: 1 };
-const LETTER_CONFIG = { tension: 150, friction: 15 };
-const LETTER_STAGGER = 90;
+const LETTER_CONFIG = { tension: 600, friction: 30 };
+const LETTER_STAGGER = 45;
 
 /* Dégradé des titres du site (.text-gradient) : #A78BFA → #38BDF8 → #22D3EE */
 const STOPS = [[0, [167, 139, 250]], [0.5, [56, 189, 248]], [1, [34, 211, 238]]];
