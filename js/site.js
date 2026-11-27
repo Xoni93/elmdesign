@@ -111,8 +111,10 @@
   const tw = $('#typewriter-text');
   if (tw && !reduceMotion) {
     const WORDS = ['briller', 'grandir', 'rayonner', 'décoller'];
-    const TYPE_MS = 85, DELETE_MS = 45, HOLD_MS = 2200, START_MS = 2000;
-    let w = 0, c = WORDS[0].length, deleting = true;
+    // Le mot s'écrit juste après « Des sites qui font » (titre animé lettre par lettre)
+    const TYPE_MS = 85, DELETE_MS = 45, HOLD_MS = 2200, START_MS = 1900;
+    let w = 0, c = 0, deleting = false;
+    tw.textContent = '';
     const tick = () => {
       if (document.hidden) { setTimeout(tick, 500); return; }
       const word = WORDS[w];
