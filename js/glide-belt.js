@@ -666,7 +666,7 @@ function mount(container, canvas, images, links) {
   start();
 }
 
-/* 5 emplacements : les captures des réalisations, en alternance */
+/* 4 emplacements (nombre pair) : Sketch Twist et TournoiPro alternent toujours, jamais deux fois la même carte de suite */
 const stage = document.querySelector(".belt");
 if (stage) {
   const canvas = stage.querySelector("canvas");
@@ -674,6 +674,6 @@ if (stage) {
   const links = (stage.dataset.links || "").split(",").map((s) => s.trim()).filter(Boolean);
   Promise.all(srcs.map((s) => new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(undefined); im.src = s; })))
     .then((loaded) => mount(stage, canvas,
-      Array.from({ length: 5 }, (_, i) => loaded[i % loaded.length]),
-      Array.from({ length: 5 }, (_, i) => links[i % links.length])));
+      Array.from({ length: 4 }, (_, i) => loaded[i % loaded.length]),
+      Array.from({ length: 4 }, (_, i) => links[i % links.length])));
 }
