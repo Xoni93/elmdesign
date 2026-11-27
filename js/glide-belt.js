@@ -1,4 +1,4 @@
-/* Halo Ring — anneau de cartes en 3D (section Réalisations) */
+/* Glide Belt — bande de cartes qui défile (section Réalisations) */
 // ── Shared helpers — src/lib/motion-templates/core.ts (minified names)
 
 function We(t) {
@@ -175,28 +175,6 @@ function V6(t) {
   T5 = t;
 }
 
-const Qx = new Map();
-
-function as(t, e, n = "card") {
-  const a = Math.max(2, Math.round(t)),
-    r = Math.max(2, Math.round(e));
-  let o = Qx.get(n);
-  if (!o) {
-    let c;
-    if (typeof OffscreenCanvas < "u") c = new OffscreenCanvas(a, r);
-    else if (typeof document < "u") c = document.createElement("canvas");
-    else return null;
-    const d = c.getContext("2d");
-    if (!d) return null;
-    ((o = { canvas: c, ctx: d }), Qx.set(n, o));
-  }
-  (o.canvas.width !== a && (o.canvas.width = a), o.canvas.height !== r && (o.canvas.height = r));
-  try {
-    ((o.ctx.imageSmoothingEnabled = !0), (o.ctx.imageSmoothingQuality = "high"));
-  } catch {}
-  return o;
-}
-
 function M5(t, e, n, a, r) {
   const o = r.unit > 0 ? a / r.unit : 1;
   (t.save(), (t.shadowColor = r.color), (t.shadowBlur = r.blur * o));
@@ -366,33 +344,6 @@ function Z6(t, e, n, a) {
   ((t.fillStyle = r), t.fillRect(0, 0, e, n));
 }
 
-const nn = [
-  {
-    type: "number",
-    id: "offsetX",
-    label: "X",
-    default: 0,
-    min: -50,
-    max: 50,
-    step: 1,
-    snap: 0,
-    unit: "%",
-    group: "Position",
-  },
-  {
-    type: "number",
-    id: "offsetY",
-    label: "Y",
-    default: 0,
-    min: -50,
-    max: 50,
-    step: 1,
-    snap: 0,
-    unit: "%",
-    group: "Position",
-  },
-];
-
 const Q6 = [
   { value: "1:1", label: "1:1" },
   { value: "4:3", label: "4:3" },
@@ -438,6 +389,8 @@ function et(t, e) {
       return 1;
   }
 }
+
+const Bc = [{ value: "frame", label: "Frame" }, ...it];
 
 function sz(t, e) {
   const n = /^#?([0-9a-f]{6})$/i.exec(t.trim());
@@ -496,300 +449,149 @@ function je(t, e) {
   return t.images[e % t.images.length] ?? null;
 }
 
-// ── The template — src/lib/motion-templates/presets/01-3d-and-perspective/cover-ring.ts
+// ── The template — src/lib/motion-templates/presets/05-carousel-and-flow/carousel-flow.ts
 
-const Qz = 8;
+const oz = 5;
 
-let lr = null;
-
-function tE(t, e) {
-  const n = Math.max(2, Math.round(t)),
-    a = Math.max(2, Math.round(e));
-  if (!lr) {
-    let r;
-    if (typeof OffscreenCanvas < "u") r = new OffscreenCanvas(n, a);
-    else if (typeof document < "u") r = document.createElement("canvas");
-    else return null;
-    const o = r.getContext("2d");
-    if (!o) return null;
-    lr = { canvas: r, ctx: o };
-  }
-  return (
-    lr.canvas.width !== n && (lr.canvas.width = n),
-    lr.canvas.height !== a && (lr.canvas.height = a),
-    lr
-  );
-}
-
-function nE(t, e, n, a, r, o, c) {
-  (t.setTransform(1, 0, 0, 1, 0, 0),
-    (t.globalCompositeOperation = "destination-in"),
-    t.beginPath(),
-    t.moveTo(a[0] - e, a[1] - n),
-    t.lineTo(r[0] - e, r[1] - n),
-    t.lineTo(o[0] - e, o[1] - n),
-    t.lineTo(c[0] - e, c[1] - n),
-    t.closePath(),
-    t.fill(),
-    (t.globalCompositeOperation = "source-over"));
-}
-
-const sE = {
-  id: "cover-ring",
-  name: "Halo Ring",
-  description: "A tilted halo of flat cards revolves a full 360°.",
-  slotCount: Qz,
-  slotRange: { min: 4, max: 16 },
-  defaultDuration: 14,
+const lz = {
+  id: "carousel-flow",
+  name: "Glide Belt",
+  description: "A smooth belt of cards glides past, the centre card drawing focus.",
+  slotCount: oz,
+  slotRange: { min: 3, max: 10 },
+  defaultDuration: 10,
   params: [
-    {
-      type: "number",
-      id: "cardSize",
-      label: "Card size",
-      default: 37,
-      min: 16,
-      max: 100,
-      step: 1,
-      unit: "%",
-    },
-    { type: "select", id: "cardAspect", label: "Card ratio", default: "1:1", options: it },
-    {
-      type: "number",
-      id: "ringSize",
-      label: "Ring size",
-      default: 131,
-      min: 50,
-      max: 400,
-      step: 1,
-      unit: "%",
-    },
-    { type: "number", id: "tilt", label: "Tilt", default: 0, min: -60, max: 60, step: 1, unit: "°" },
-    {
-      type: "number",
-      id: "perspective",
-      label: "Perspective",
-      default: 55,
-      min: 0,
-      max: 100,
-      step: 5,
-      unit: "%",
-    },
-    {
-      type: "number",
-      id: "backFade",
-      label: "Back fade",
-      default: 55,
-      min: 0,
-      max: 90,
-      step: 5,
-      unit: "%",
-    },
     {
       type: "select",
       id: "direction",
       label: "Direction",
-      default: "right",
+      default: "horizontal",
       options: [
-        { value: "right", label: "Clockwise" },
-        { value: "left", label: "Counter-clockwise" },
+        { value: "horizontal", label: "Horizontal" },
+        { value: "vertical", label: "Vertical" },
       ],
     },
     {
-      type: "select",
-      id: "motion",
-      label: "Motion",
-      default: "steps",
-      options: [
-        { value: "steps", label: "Step per card" },
-        { value: "flow", label: "Continuous" },
-      ],
+      type: "number",
+      id: "sideScale",
+      label: "Side card scale",
+      default: 0.82,
+      min: 0.6,
+      max: 1,
+      step: 0.01,
     },
-    ...nn,
+    { type: "number", id: "gap", label: "Gap", default: 5, min: 1, max: 15, step: 0.5, unit: "%" },
+    { type: "select", id: "cardAspect", label: "Card ratio", default: "1:1", options: Bc },
   ],
   render(t) {
     const { ctx: e, t: n, width: a, height: r, params: o } = t,
       c = He(t),
-      d = c.content,
-      h = c.u * H(o, "cardSize", 37),
-      f = h * et(he(o, "cardAspect", "1:1"), t),
-      p = (Math.min(d.w, d.h) / 2) * (H(o, "ringSize", 131) / 100),
-      m = (H(o, "tilt", 0) * Math.PI) / 180,
-      b = Math.cos(m),
-      y = Math.sin(m),
-      _ = p * (8 - 5.6 * (H(o, "perspective", 55) / 100)),
-      w = 1 - H(o, "backFade", 55) / 100,
-      E = he(o, "direction", "right") === "right" ? 1 : -1,
-      T = c.radius * 1.2,
-      k = a / 2,
-      A = r / 2,
-      C = Math.max(4, t.images.length);
-    let I;
-    if (he(o, "motion", "steps") === "flow") I = E * 2 * Math.PI * n;
+      d = c.ease,
+      h = H(o, "sideScale", 0.82),
+      f = c.u * H(o, "gap", 5),
+      p = Math.max(3, t.images.length),
+      { index: m, local: b } = Mt(n, p),
+      y = m + d(xe(b, 0, 0.45)),
+      _ = he(o, "direction", "horizontal") === "vertical" ? "y" : "x",
+      x = he(o, "cardAspect", "1:1"),
+      w = _ === "x" ? c.content.w : c.content.h,
+      E = _ === "x" ? c.content.h : c.content.w;
+    let T, k;
+    if (x === "frame") ((T = _ === "x" ? w * 0.62 : E), (k = _ === "x" ? E : w * 0.62));
     else {
-      const { index: Y, local: F } = Mt(n, C);
-      I = (E * 2 * Math.PI * (Y + c.ease(xe(F, 0, 0.55)))) / C;
+      const O = et(x, t);
+      let $ = E,
+        L = _ === "x" ? $ * O : $ / O;
+      (L > w && ((L = w * 0.82), ($ = _ === "x" ? L / O : L * O)),
+        (T = _ === "x" ? L : $),
+        (k = _ === "x" ? $ : L));
     }
-    const z = (2 * Math.PI * 0.1) / C,
-      B = Array.from({ length: C }, (Y, F) => {
-        const Q = I + (2 * Math.PI * F) / C + z;
-        return { i: F, phi: Q, depth: Math.cos(Q) };
-      }).sort((Y, F) => Y.depth - F.depth),
-      O = as(f, h),
-      $ = O ? O.canvas.width : f,
-      L = O ? O.canvas.height : h,
-      X = f / 2;
-    for (const Y of B) {
-      const F = Math.cos(Y.phi),
-        Q = Math.sin(Y.phi),
-        P = (be, Ee) => {
-          const ye = p * Q + be * F,
-            ke = p * F - be * Q,
-            Te = Ee * b - ke * y,
-            Se = Ee * y + ke * b,
-            $e = _ / (_ - Se);
-          return [k + ye * $e, A - Te * $e];
-        },
-        q = w + (1 - w) * We((Y.depth + 0.3) / 0.6),
-        W = je(t, Y.i);
-      if (!O) {
-        const be = P(0, 0),
-          Ee = P(-X, 0),
-          ye = P(X, 0),
-          ke = P(0, h / 2),
-          Te = P(0, -h / 2);
-        (e.save(),
-          (e.globalAlpha *= q),
-          e.transform(
-            (ye[0] - Ee[0]) / f,
-            (ye[1] - Ee[1]) / f,
-            (Te[0] - ke[0]) / h,
-            (Te[1] - ke[1]) / h,
-            be[0],
-            be[1],
-          ),
-          Re(e, W, Y.i, { x: -X, y: -h / 2, w: f, h }, T),
-          e.restore());
-        continue;
-      }
-      (O.ctx.clearRect(0, 0, $, L), Re(O.ctx, W, Y.i, { x: 0, y: 0, w: $, h: L }, T));
-      const V = P(-X, -h / 2),
-        K = P(X, -h / 2),
-        M = P(X, h / 2),
-        U = P(-X, h / 2),
-        N = Math.min(V[0], K[0], M[0], U[0]) - 2,
-        j = Math.min(V[1], K[1], M[1], U[1]) - 2,
-        Z = Math.max(V[0], K[0], M[0], U[0]) + 2 - N,
-        ne = Math.max(V[1], K[1], M[1], U[1]) + 2 - j,
-        le = tE(Z, ne),
-        te = le ? le.ctx : e;
-      (te.setTransform(1, 0, 0, 1, 0, 0),
-        le && te.clearRect(0, 0, Math.ceil(Z), Math.ceil(ne)),
-        te.save(),
-        le ? te.setTransform(1, 0, 0, 1, -N, -j) : (te.globalAlpha = q));
-      const se = Math.hypot(K[0] - V[0], K[1] - V[1]),
-        re = Math.min(48, Math.max(6, Math.round(se / 8))),
-        fe = $ / re;
-      let ge = P(-X, -h / 2),
-        _e = P(-X, h / 2);
-      for (let be = 0; be < re; be++) {
-        const Ee = -X + ((be + 1) / re) * f,
-          ye = P(Ee, -h / 2),
-          ke = P(Ee, h / 2),
-          Te = ($ * be) / re,
-          Se = (_e[0] + ge[0]) / 2,
-          $e = (_e[1] + ge[1]) / 2,
-          Fe = ((ke[0] + ye[0]) / 2 - Se) / fe,
-          Ge = ((ke[1] + ye[1]) / 2 - $e) / fe,
-          Ze = ge[0] - _e[0],
-          Xe = ge[1] - _e[1],
-          Rt = ye[0] - ke[0],
-          bt = ye[1] - ke[1],
-          ft = Rt * Rt + bt * bt > Ze * Ze + Xe * Xe,
-          yt = (ft ? Rt : Ze) / L,
-          Jt = (ft ? bt : Xe) / L,
-          Yt = Se - Fe * Te - (yt * L) / 2,
-          ot = $e - Ge * Te - (Jt * L) / 2;
-        if (Fe * Fe + Ge * Ge > 1e-6) {
-          const Ct = Math.max(0, Te - 0.75),
-            Me = Math.min($, Te + fe + 0.75) - Ct;
-          (te.save(),
-            te.transform(Fe, Ge, yt, Jt, Yt, ot),
-            te.drawImage(O.canvas, Ct, 0, Me, L, Ct, 0, Me, L),
-            te.restore());
-        }
-        ((ge = ye), (_e = ke));
-      }
-      (le && nE(te, N, j, V, K, M, U),
-        te.restore(),
-        le &&
-          (e.save(),
-          (e.globalAlpha *= q),
-          e.drawImage(le.canvas, 0, 0, Math.ceil(Z), Math.ceil(ne), N, j, Math.ceil(Z), Math.ceil(ne)),
-          e.restore()));
+    const A = (_ === "x" ? T : k) + f,
+      C = A * p,
+      I = a / 2,
+      z = r / 2,
+      B = [];
+    for (let O = 0; O < p; O++) {
+      let $ = (O - y) * A;
+      (($ = ((($ % C) + C * 1.5) % C) - C / 2), B.push({ slot: O, offset: $, dist: Math.abs($) }));
+    }
+    B.sort((O, $) => $.dist - O.dist);
+    for (const O of B) {
+      const $ = Math.max(0, 1 - O.dist / A),
+        L = h + (1 - h) * $,
+        X = 0.55 + 0.45 * $,
+        Y = T * L,
+        F = k * L,
+        Q = _ === "x" ? I + O.offset - Y / 2 : I - Y / 2,
+        P = _ === "y" ? z + O.offset - F / 2 : z - F / 2;
+      Re(e, je(t, O.slot), O.slot, { x: Q, y: P, w: Y, h: F }, c.radius * L, {
+        alpha: X,
+        shadow: c.shadow * 2 * $,
+      });
     }
   },
 };
 
 
-/* ===== Hôte — boucle requestAnimationFrame (portée telle quelle du prompt) =====
-   Changements : pas de fond sombre peint derrière les cartes, pour garder
-   le fond clair du site (#f7f8fb). Pause quand la section est hors écran,
-   arrêt au survol d'une carte, clic = ouverture du projet. */
-const TEMPLATE = sE;
+/* ===== Hôte — boucle requestAnimationFrame (portée du prompt) =====
+   Changements : pas de fond sombre peint derrière les cartes (on garde le fond
+   clair du site), pause hors écran, et interaction :
+   - survol d'une carte : le défilement s'arrête et la carte zoome légèrement ;
+   - clic : ouverture du projet dans un nouvel onglet. */
+const TEMPLATE = lz;
 const DPR_CAP = 2;
-const LOOP_SECONDS = 28.0;
-const PARAMS = {"cornerRadius":3,"padding":6,"shadowEnabled":false,"cardSize":70,"cardAspect":"1:1","ringSize":200,"tilt":0,"perspective":55,"backFade":55,"direction":"right","motion":"steps","offsetX":0,"offsetY":0,"backgroundType":"color","background":"rgba(0,0,0,0)"};
+const LOOP_SECONDS = 20.0;
+const PARAMS = {"cornerRadius":3,"padding":6,"shadowEnabled":false,"direction":"horizontal","sideScale":1,"gap":15,"cardAspect":"auto","backgroundType":"color","background":"rgba(0,0,0,0)"};
+const ZOOM = 0.07;        // +7 % au survol
+const ZOOM_MS = 220;      // durée du zoom
 
-/* Même projection que render() : les 4 coins de chaque carte à l'écran, de l'avant vers l'arrière.
-   Sert uniquement à savoir quelle carte est sous le curseur (pause + clic). */
-function cardQuads(t, a, r, params, images) {
+/* Même géométrie que render() : rectangle, échelle et opacité de chaque carte,
+   de la plus proche du centre à la plus éloignée. */
+function cardRects(t, a, r, params, images) {
   const u = k5(a, r),
-    d = G6(a, r, H(params, "padding", 6)),
-    ease = w5(he(params, "easing", "smooth"), H(params, "easeAmount", 60), he(params, "easeBezier", "")),
-    ox = u * H(params, "offsetX", 0),
-    oy = u * H(params, "offsetY", 0),
-    h = u * H(params, "cardSize", 37),
-    f = h * et(he(params, "cardAspect", "1:1"), { images }),
-    p = (Math.min(d.w, d.h) / 2) * (H(params, "ringSize", 131) / 100),
-    m = (H(params, "tilt", 0) * Math.PI) / 180,
-    b = Math.cos(m),
-    y = Math.sin(m),
-    _ = p * (8 - 5.6 * (H(params, "perspective", 55) / 100)),
-    E = he(params, "direction", "right") === "right" ? 1 : -1,
-    k = a / 2,
-    A = r / 2,
-    C = Math.max(4, images.length),
-    X = f / 2;
-  let I;
-  if (he(params, "motion", "steps") === "flow") I = E * 2 * Math.PI * t;
+    content = G6(a, r, H(params, "padding", 6)),
+    radius = u * H(params, "cornerRadius", 3),
+    d = w5(he(params, "easing", "smooth"), H(params, "easeAmount", 60), he(params, "easeBezier", "")),
+    h = H(params, "sideScale", 0.82),
+    f = u * H(params, "gap", 5),
+    p = Math.max(3, images.length),
+    { index: m, local: b } = Mt(t, p),
+    y = m + d(xe(b, 0, 0.45)),
+    _ = he(params, "direction", "horizontal") === "vertical" ? "y" : "x",
+    x = he(params, "cardAspect", "1:1"),
+    w = _ === "x" ? content.w : content.h,
+    E = _ === "x" ? content.h : content.w;
+  let T, k;
+  if (x === "frame") ((T = _ === "x" ? w * 0.62 : E), (k = _ === "x" ? E : w * 0.62));
   else {
-    const { index: Y, local: F } = Mt(t, C);
-    I = (E * 2 * Math.PI * (Y + ease(xe(F, 0, 0.55)))) / C;
+    const O = et(x, { images });
+    let $ = E,
+      L = _ === "x" ? $ * O : $ / O;
+    (L > w && ((L = w * 0.82), ($ = _ === "x" ? L / O : L * O)), (T = _ === "x" ? L : $), (k = _ === "x" ? $ : L));
   }
-  const z = (2 * Math.PI * 0.1) / C;
-  return Array.from({ length: C }, (_unused, i) => {
-    const phi = I + (2 * Math.PI * i) / C + z, F = Math.cos(phi), Q = Math.sin(phi);
-    const P = (be, Ee) => {
-      const ye = p * Q + be * F, ke = p * F - be * Q, Te = Ee * b - ke * y, Se = Ee * y + ke * b, $e = _ / (_ - Se);
-      return [k + ye * $e + ox, A - Te * $e + oy];
-    };
-    return { i, depth: F, quad: [P(-X, -h / 2), P(X, -h / 2), P(X, h / 2), P(-X, h / 2)] };
-  }).sort((s1, s2) => s2.depth - s1.depth);
-}
-
-function inQuad(x, y, q) {
-  let sign = 0;
-  for (let n = 0; n < 4; n++) {
-    const [x1, y1] = q[n], [x2, y2] = q[(n + 1) % 4];
-    const c = (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1);
-    if (c !== 0) { if (sign && Math.sign(c) !== sign) return false; sign = Math.sign(c); }
+  const A = (_ === "x" ? T : k) + f, C = A * p, I = a / 2, z = r / 2, out = [];
+  for (let O = 0; O < p; O++) {
+    let $ = (O - y) * A;
+    $ = ((($ % C) + C * 1.5) % C) - C / 2;
+    const dist = Math.abs($), s = Math.max(0, 1 - dist / A), L = h + (1 - h) * s, Y = T * L, F = k * L;
+    out.push({
+      slot: O, dist, alpha: 0.55 + 0.45 * s, radius: radius * L,
+      rect: { x: _ === "x" ? I + $ - Y / 2 : I - Y / 2, y: _ === "y" ? z + $ - F / 2 : z - F / 2, w: Y, h: F },
+    });
   }
-  return true;
+  return out.sort((o1, o2) => o1.dist - o2.dist);
 }
 
 function mount(container, canvas, images, links) {
   const ctx = canvas.getContext("2d");
-  let hovered = -1; // carte sous le curseur (-1 = aucune) : l'anneau s'arrête tant qu'elle est survolée
+  // Une version transparente de chaque image : le moteur « dessine » la carte zoomée
+  // à vide, et on la redessine nous-mêmes par-dessus, agrandie (pas de double opacité).
+  const blanks = images.map((im) => {
+    if (!im) return im;
+    const c = document.createElement("canvas");
+    c.width = im.width; c.height = im.height;
+    return c;
+  });
   const resize = () => {
     const dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP);
     canvas.width = Math.round(container.clientWidth * dpr);
@@ -798,38 +600,63 @@ function mount(container, canvas, images, links) {
   resize();
   let t = 0.12;
   let last = performance.now();
+  let hovered = -1;   // carte sous le curseur
+  let zoomSlot = -1;  // carte en cours de zoom (reste le temps du dézoom)
+  let zk = 0;         // progression du zoom 0 → 1
+  const easeOut = (v) => 1 - Math.pow(1 - v, 3);
   const draw = () => {
+    const imgs = zoomSlot >= 0 && zk > 0 ? images.map((im, i) => (i === zoomSlot ? blanks[i] : im)) : images;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    TEMPLATE.render({ ctx, t, width: canvas.width, height: canvas.height, params: PARAMS, images, background: null });
+    TEMPLATE.render({ ctx, t, width: canvas.width, height: canvas.height, params: PARAMS, images: imgs, background: null });
+    if (zoomSlot >= 0 && zk > 0) {
+      const c = cardRects(t, canvas.width, canvas.height, PARAMS, images).find((o) => o.slot === zoomSlot);
+      if (c) {
+        const k = easeOut(zk), s = 1 + ZOOM * k, R = c.rect;
+        const rect = { x: R.x + R.w / 2 - (R.w * s) / 2, y: R.y + R.h / 2 - (R.h * s) / 2, w: R.w * s, h: R.h * s };
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        Re(ctx, images[zoomSlot], zoomSlot, rect, c.radius * s, { alpha: c.alpha + (1 - c.alpha) * k });
+      }
+    }
   };
   new ResizeObserver(() => { resize(); draw(); }).observe(container);
 
-  // Quelle carte est sous le pointeur ? (la plus en avant gagne)
   const hit = (ev) => {
     const rect = canvas.getBoundingClientRect();
     const x = (ev.clientX - rect.left) * (canvas.width / rect.width);
     const y = (ev.clientY - rect.top) * (canvas.height / rect.height);
-    for (const c of cardQuads(t, canvas.width, canvas.height, PARAMS, images)) if (inQuad(x, y, c.quad)) return c.i;
+    for (const c of cardRects(t, canvas.width, canvas.height, PARAMS, images)) {
+      const R = c.rect;
+      if (x >= R.x && x <= R.x + R.w && y >= R.y && y <= R.y + R.h) return c.slot;
+    }
     return -1;
   };
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   canvas.addEventListener("pointermove", (ev) => {
-    hovered = ev.pointerType === "mouse" ? hit(ev) : -1;
-    canvas.style.cursor = hit(ev) >= 0 ? "pointer" : "";
+    const i = hit(ev);
+    canvas.style.cursor = i >= 0 ? "pointer" : "";
+    hovered = ev.pointerType === "mouse" ? i : -1;
+    if (hovered >= 0) zoomSlot = hovered;
+    if (reduce) { zk = hovered >= 0 ? 1 : 0; draw(); }
   });
-  canvas.addEventListener("pointerleave", () => { hovered = -1; canvas.style.cursor = ""; });
+  canvas.addEventListener("pointerleave", () => { hovered = -1; canvas.style.cursor = ""; if (reduce) { zk = 0; draw(); } });
   canvas.addEventListener("click", (ev) => {
     const i = hit(ev);
-    const url = i >= 0 ? links[i % links.length] : null;
+    const url = i >= 0 ? links[i] : null;
     if (url) window.open(url, "_blank", "noopener");
   });
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { draw(); return; }
+
+  if (reduce) { draw(); return; }
   let visible = true, running = false;
   const tick = (now) => {
     if (!visible) { running = false; return; }
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     if (hovered < 0) t = (t + dt / LOOP_SECONDS) % 1;
+    // zoom vers 1 sur la carte survolée, retour à 0 sinon
+    const target = hovered >= 0 && hovered === zoomSlot ? 1 : 0;
+    zk += Math.sign(target - zk) * Math.min(Math.abs(target - zk), (dt * 1000) / ZOOM_MS);
+    if (zk === 0 && hovered < 0) zoomSlot = -1;
     draw();
     requestAnimationFrame(tick);
   };
@@ -839,12 +666,14 @@ function mount(container, canvas, images, links) {
   start();
 }
 
-/* 8 emplacements : les captures des réalisations, en alternance */
-const stage = document.querySelector(".halo");
+/* 5 emplacements : les captures des réalisations, en alternance */
+const stage = document.querySelector(".belt");
 if (stage) {
   const canvas = stage.querySelector("canvas");
   const srcs = (stage.dataset.images || "").split(",").map((s) => s.trim()).filter(Boolean);
   const links = (stage.dataset.links || "").split(",").map((s) => s.trim()).filter(Boolean);
   Promise.all(srcs.map((s) => new Promise((ok) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => ok(undefined); im.src = s; })))
-    .then((loaded) => mount(stage, canvas, Array.from({ length: 8 }, (_, i) => loaded[i % loaded.length]), Array.from({ length: 8 }, (_, i) => links[i % links.length])));
+    .then((loaded) => mount(stage, canvas,
+      Array.from({ length: 5 }, (_, i) => loaded[i % loaded.length]),
+      Array.from({ length: 5 }, (_, i) => links[i % links.length])));
 }
